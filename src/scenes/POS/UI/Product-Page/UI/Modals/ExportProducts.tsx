@@ -15,7 +15,7 @@ interface ModalProps {
 }
 
 export default function ExportProducts({ open, onClose }: ModalProps) {
-    const [type, setType] = useState<'csv' | 'pdf' | 'html'>('pdf');
+    const [type, setType] = useState<'csv' | 'pdf' | 'html'>('csv');
     const [loading, setLoading] = useState(false);
 
     const navigateForPdf = async () => {
@@ -96,7 +96,6 @@ export default function ExportProducts({ open, onClose }: ModalProps) {
                 <POSSelect
                     value={type}
                     options={[
-                        { value: 'pdf', label: 'PDF' },
                         { value: 'csv', label: 'CSV' },
                     ]}
                     onChange={(e) => setType(e.target.value as typeof type)}

@@ -103,17 +103,7 @@ export default function SalesTable({
                         }}
                         sx={{ cursor: 'pointer', fontSize: 18 }}
                     />
-                    {haveReadInvoicePermission && (
-                        <FaRegFilePdf
-                            size={16}
-                            style={{ cursor: 'pointer' }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                window.open(`${process.env.REACT_APP_URL2}/api/invoice/${row.id}/pdf`, '_blank');
-                            }}
-                        />
-                    )}
+                  
                     <img
                         src={DeleteIcon}
                         alt="Delete"

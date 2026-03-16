@@ -81,15 +81,6 @@ const GiftCardBody = ({ giftCardData, isFetching }: GiftCardBodyProps) => {
             name: '',
             selector: (row: RowType) => (
                 <Stack sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                    {haveReadInvoicePermission && (
-                        <FaRegFilePdf
-                            size={16}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handlePrintInvoice({ id: row.salesId as string });
-                            }}
-                        />
-                    )}
                     <PiTicketBold
                         size={17}
                         onClick={(e) => {

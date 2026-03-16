@@ -1443,7 +1443,7 @@ export default function CreateBookingTab({
                                                         mt: 1.5,
                                                     }}
                                                 >
-                                                    <Typography>kr.</Typography>
+                                                    <Typography>₹</Typography>
                                                 </Box>
                                             </Stack>
                                         </BlurPrice>

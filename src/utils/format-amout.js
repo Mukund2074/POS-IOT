@@ -13,7 +13,7 @@ numeral.register('locale', 'da', {
         trillion: 't',
     },
     currency: {
-        symbol: 'kr.',
+        symbol: '₹',
     },
 });
 
@@ -43,7 +43,7 @@ const formatAmount = (value, isShort = false, negativeSymbol = false) => {
     // let formattedValue = numeral(value).format(`0,0.${decimalFormat}`);
 
     if (isShort) {
-        return `${numeral(parseFloat(value)).format('0,0.00a') + ' kr.'}`;
+        return `₹${numeral(parseFloat(value)).format('0,0.00a')}`
     }
 
     // if (Number(value) < 0) {
@@ -54,7 +54,7 @@ const formatAmount = (value, isShort = false, negativeSymbol = false) => {
     //   }
     // }
 
-    return `${numeral(parseFloat(value)).format('0,0.00') + ' kr.'}`;
+    return `₹${numeral(parseFloat(value)).format('0,0.00')}`;
 };
 
 const formatAmountWithoutCurrency = (value) => {
