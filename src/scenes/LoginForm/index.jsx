@@ -56,7 +56,7 @@ const LoginFlow = () => {
                 refreshSettings();
             }, 1500);
         } else {
-            localStorage.setItem('language', 'da');
+            localStorage.setItem('language', 'en');
         }
     }, [auth_token, navigate, refreshSettings]);
 

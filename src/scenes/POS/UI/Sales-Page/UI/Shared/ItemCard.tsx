@@ -7,12 +7,10 @@ import { useCart } from '@/context/POS/CartContext';
 import {
     GetApiProductsListing200,
     GetApiProductsListing200ProductsItem,
-    GetApiProductsListing200ServicesItem,
     PostApiSaleBodyDataItemsItemItemType,
     PostApiSaleBodyDataItemsItemSaleType,
 } from '@/shared/api/models';
 import POSHeading from '@/components/POS/Common/POSHeading';
-import POSAccordion from '@/components/POS/Common/POSAccordion';
 import { HiOutlineGift, HiOutlineReceiptRefund } from 'react-icons/hi';
 import { ShoppingCartCheckoutRounded, StyleOutlined } from '@mui/icons-material';
 import RefundModal from '../Create/Modals/RefundModal';
@@ -45,7 +43,6 @@ export const ItemCard = ({
     const custolineID = `custom-line-product-${moment().unix()}`;
 
     const [openItemId, setOpenItemId] = useState<string | null>(null);
-    const [servicesAccordionOpen, setServicesAccordionOpen] = useState(false);
 
     const filteredProducts = productData?.data?.products
         ?.filter((category) => {
@@ -243,59 +240,6 @@ export const ItemCard = ({
                 />
                 <ShoppingCartCheckoutRounded sx={{ fontSize: 20 }} />
             </Stack>
-
-            {filteredServices &&
-                filteredServices.length > 0 &&
-                (
-                    <POSAccordion
-                        title={<POSHeading sx={{ fontSize: 14, fontWeight: 400, px: 2 }} text={t('Common.Services')} />}
-                        expanded={
-                            servicesAccordionOpen ||
-                            search?.length > 1 ||
-                            (openItemId !== null &&
-                                filteredServices?.some(
-                                    (serviceGroup: GetApiProductsListing200ServicesItem) =>
-                                        serviceGroup.id.toString() === openItemId,
-                                ))
-                        }
-                        onChange={(_, expanded) => {
-                            setServicesAccordionOpen(expanded);
-                            // this will allow direct close the perent accordion
-                            if (!expanded) {
-                                setOpenItemId(null);
-                            }
-                        }}
-                        sx={{
-                            p: 0,
-                            width: '100%',
-                            m: 0,
-                            '&.Mui-expanded': {
-                                m: 0,
-                            },
-                        }}
-                        summarySx={{
-                            border: '1px solid #d9d9d9',
-                            // backgroundColor: '#f0f0f0',
-                            p: 0,
-                            px: 2,
-                            m: 0,
-                        }}
-                        detailsSx={{ p: 0, ml: 1 }}
-                    >
-                        {filteredServices?.map((serviceGroup: GetApiProductsListing200ServicesItem) => (
-                                    <CategoryList
-                                        key={serviceGroup.id}
-                                        category={serviceGroup}
-                                        search={search}
-                                        openItemId={openItemId}
-                                        onExpand={(idx) => {
-                                            setOpenItemId(idx);
-                                        }}
-                                        accesKey="services"
-                                    />
-                                ))}
-                    </POSAccordion>
-                )}
 
             <React.Fragment>
                 {filteredProducts?.length > 0 &&

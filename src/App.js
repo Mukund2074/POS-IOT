@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 // import Sidebar from './scenes/global/Sidebar';
 import { CircularProgress, CssBaseline, Drawer, Stack, ThemeProvider, Typography, useMediaQuery } from '@mui/material';

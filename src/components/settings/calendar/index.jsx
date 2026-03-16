@@ -15,13 +15,13 @@ import { settings } from '../../../context/settingsSlice';
 import { useDispatch } from 'react-redux';
 
 import { t } from 'i18next';
-import { dividerSx } from '../../../scenes/Settings/Index';
 import { MultipleContainers } from '../../MultipleContainers/MultipleContainers';
 import { rectSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 import FButton from '../../commonComponents/F_Button';
 import ExportBookings from './popup/ExportBookings';
 import FPrimaryHeading from '../../commonComponents/F_PrimaryHeading';
+import { dividerSx } from '../../commonComponents/DividerSx';
 
 // const initialValues = {
 //     "setCalendarOpeningHour": 120,

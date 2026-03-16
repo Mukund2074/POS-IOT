@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { RiArrowDownSLine, RiDoorOpenLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import packageJson from '../../package.json';
-import { Avatar, Divider, Stack, Typography } from '@mui/material';
+import { Divider } from '@mui/material';
 
 // @ts-ignore
 import { route } from '../context/routeSlice';
@@ -17,13 +17,7 @@ import { useQueryClient } from '@tanstack/react-query';
 // @ts-ignore
 import logo from '@/assets/fiind-orange-logo.png';
 import SidebarIcon from '@/assets/Marketing/SidebarIcon.svg';
-import CalendarIcon from '@/assets/Marketing/CalendarIcon.svg';
-import HistoryIcon from '@/assets/Marketing/HistoryIcon.svg';
 import CustomersIcon from '@/assets/Marketing/CustomersIcon.svg';
-import OffersIcon from '@/assets/Marketing/OffersIcon.svg';
-import InsightsIcon from '@/assets/Marketing/InsightsIcon.svg';
-import StatisticsIcon from '@/assets/Marketing/StatisticsIcon.svg';
-import MarketingIcon from '@/assets/Marketing/MarketingLogo.svg';
 import POSIcon from '@/assets/Marketing/POSIcon.svg';
 import PunchCardIcon from '@/assets/Marketing/PunchCardIcon.svg';
 import GiftCardIcon from '@/assets/Marketing/GiftCardIcon.svg';
@@ -36,11 +30,6 @@ import { cnMerge } from '@/utils/cnMerge';
 import { t } from 'i18next';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-
-// @ts-ignore
-import PopUpForOTP from './calanderPopups/PopUpForOTP';
-// @ts-ignore
-import PopupForEmployee from './calanderPopups/PopUpForEmployee';
 // @ts-ignore
 import { authEmployeeApi } from '@/utils/Api/Authantication';
 // @ts-ignore
@@ -88,30 +77,8 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
 
     /** Use both permission and settings so we only hide items user actually lacks (not when key is under .settings) */
     const permission = user?.permission ?? user?.settings ?? {};
-    const isDoctor = setting?.isDoctor === true || localStorage.getItem('employee_role') === 'DOCTOR';
 
     const sidebarItems: SideBarTypes[] = [
-        {
-            id: 1,
-            key: 'calendar',
-            path: '/calendar',
-            icon: CalendarIcon,
-            title: 'Calendar',
-            // subMenu: [
-            //     { key: 'calendar-1', path: '/calendar/one', title: 'Calendar 1' },
-            //     { key: 'calendar-2', path: '/calendar/two', title: 'Calendar 2' },
-            // ],
-            sequence: 1,
-        },
-        {
-            id: 2,
-            key: 'history',
-            path: '/history',
-            icon: HistoryIcon,
-            title: 'History',
-            // subMenu: [{ key: 'history-1', path: '/history/one', title: 'History 1' }],
-            sequence: 2,
-        },
         {
             id: 3,
             key: 'customers',
@@ -122,49 +89,15 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
         },
         {
             id: 4,
-            key: 'services',
-            path: '/services',
-            icon: ServicesIcon,
-            title: 'Services',
+            key: 'employees',
+            path: '/employees',
+            icon: SettingsIcon,
+            title: 'Employees',
             sequence: 4,
         },
-        {
-            id: 5,
-            key: 'specialoffers',
-            path: '/specialoffers',
-            icon: OffersIcon,
-            title: 'Special offers',
-            // subMenu: [{ key: 'specialoffers', path: '/specialoffers', title: 'Special offers' }],
-            sequence: 5,
-        },
-        {
-            id: 6,
-            key: 'insights',
-            path: '/insights',
-            icon: InsightsIcon,
-            title: 'Insights',
-            sequence: 6,
-        },
-        {
-            id: 7,
-            key: 'statistics',
-            path: '/statistics',
-            icon: StatisticsIcon,
-            title: 'Statistics',
-            sequence: 7,
-        },
-        // {
-        //     id: 13,
-        //     key: 'doctors',
-        //     path: '/doctors',
-        //     icon: DoctorBagIcon,
-        //     title: t('Doctors.ModuleTitle'),
-        //     sequence: 8.5,
-        // },
     ];
 
     const addonsItems = [
-        { id: 8, key: 'marketing', path: '/marketing', icon: MarketingIcon, title: 'Marketing', sequence: 8 },
         { id: 9, key: 'pos', path: '/pos', icon: POSIcon, title: 'POS', sequence: 9 },
         { id: 10, key: 'gift-card', path: '/gift-card', icon: GiftCardIcon, title: 'Gift card', sequence: 10 },
         { id: 11, key: 'punch-card', path: '/punch-card', icon: PunchCardIcon, title: 'Punch card', sequence: 11 },
@@ -178,32 +111,6 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
         title: 'Settings',
         // subMenu: [{ key: 'settings', path: '/settings', title: 'Settings 1' }],
         sequence: 12,
-    };
-
-    const handleTransferToOTP = () => {
-        if (!selectedPopUpEmployee) {
-            toast.error(t('Calendar.ToastErrEmpSelect'));
-            return;
-        }
-
-        const loc = locations?.find((location: any) => location?.profile?.id === setting?.profile?.id);
-        const isBypass = loc?.by_pass_access_code;
-
-        if (isBypass) {
-            // perform server-side switch without passcode
-            handleFinalLogin({
-                employee: selectedPopUpEmployee,
-                combinedPasscode: undefined,
-                selectedLocationToken: loc?.access_token,
-            }).then(() => {
-                refreshSettings?.();
-            });
-            return;
-        }
-
-        // otherwise open OTP modal
-        setTriggerSwitchUser(false);
-        setPopupOTPModal(true);
     };
 
     // Server-side OTP/auth flow (keeps parity with other parts of the app).
@@ -291,10 +198,6 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
     };
 
     const filteredSidebarItems = useMemo(() => {
-        if (isDoctor) {
-            return sidebarItems.filter((item) => item.key === 'customers').sort((a, b) => a.sequence - b.sequence);
-        }
-
         const isAdmin = user?.role === 'ADMIN';
         const items: SideBarTypes[] = isAdmin
             ? [...sidebarItems].sort((a, b) => a.sequence - b.sequence)
@@ -302,11 +205,22 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
                   .filter(
                       (item) =>
                           item.key === 'calendar' ||
+                          item.key === 'customers' ||
+                          item.key === 'employees' ||
                           permission[PERMISSION_MAP[item.key as keyof typeof PERMISSION_MAP]],
                   )
                   .sort((a, b) => a.sequence - b.sequence);
 
-        if (storeSettings?.outlet_addons?.length > 0) {
+        // POS/GiftCard/PunchCard: show for admins or users with view_pos permission, independent of storeSettings addons.
+        if (isAdmin || permission[PERMISSION_MAP['pos']]) {
+            ['pos', 'gift-card', 'punch-card'].forEach((key) => {
+                const existing = items.some((i) => i.key === key);
+                if (!existing) {
+                    const addonItem = addonsItems.find((i) => i.key === key);
+                    if (addonItem) items.push(addonItem);
+                }
+            });
+        } else if (storeSettings?.outlet_addons?.length > 0) {
             const hasPOS = storeSettings.outlet_addons.some((addon: any) => addon.addon_id === 4);
 
             if (hasPOS && (isAdmin || permission[PERMISSION_MAP['pos']])) {
@@ -336,7 +250,7 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
         // ✅ SORT BY ID
         return items.filter(Boolean).sort((a, b) => a.sequence - b.sequence);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [storeSettings, isDoctor, permission, user?.role]);
+    }, [storeSettings, permission, user?.role]);
 
     return (
         <div
@@ -457,39 +371,10 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
                     )}
                 >
                     {/* Settings */}
-                    {!isDoctor && (user?.role === 'ADMIN' || permission[PERMISSION_MAP['settings']]) && (
+                    {(user?.role === 'ADMIN' || permission[PERMISSION_MAP['settings']]) && (
                         <>
                             {!settingsItem?.subMenu ? (
-                                // 🔹 Simple Settings link
-                                <Link
-                                    to={settingsItem?.path}
-                                    onClick={() => {
-                                        dispatch(route(settingsItem?.key));
-
-                                        if (isMobile) {
-                                            onClose?.(); // close drawer
-                                            setCollapse(false);
-                                        }
-                                    }}
-                                    className={`flex items-center gap-3 px-3 py-2 text-text-secondary no-underline ${
-                                        isMobile ? 'justify-start' : isCollapse ? 'justify-center' : 'ml-2'
-                                    } ${location.pathname.startsWith('/settings') ? 'icon-active' : ''}`}
-                                >
-                                    <img src={settingsItem?.icon} className="h-6 w-6" alt="setting_icon" />
-                                    <span
-                                        className={`text-sm font-medium ${
-                                            isMobile
-                                                ? isCollapse
-                                                    ? 'block'
-                                                    : 'hidden'
-                                                : isCollapse
-                                                  ? 'hidden'
-                                                  : 'block'
-                                        }`}
-                                    >
-                                        {settingsItem?.title}
-                                    </span>
-                                </Link>
+                                ''
                             ) : (
                                 // 🔹 Settings accordion
                                 <Accordion.Item value={settingsItem.key}>
@@ -550,111 +435,28 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
                         </>
                     )}
                     <Divider />
-                    {isDoctor || (user?.role !== 'ADMIN' && !permission[PERMISSION_MAP['settings']]) ? (
-                        <button
-                            type="button"
-                            onClick={() => performCompleteLogout(queryClient, navigate)}
+                    <button
+                        type="button"
+                        onClick={() => performCompleteLogout(queryClient, navigate)}
+                        className={cnMerge(
+                            'flex items-center gap-3 w-full px-3 py-2 text-text-secondary no-underline border-none bg-transparent cursor-pointer text-left',
+                            isMobile ? 'justify-start' : isCollapse ? 'justify-center' : 'ml-2',
+                        )}
+                    >
+                        <RiDoorOpenLine className="h-6 w-6 flex-shrink-0" aria-hidden />
+                        <span
                             className={cnMerge(
-                                'flex items-center gap-3 w-full px-3 py-2 text-text-secondary no-underline border-none bg-transparent cursor-pointer text-left',
-                                isMobile ? 'justify-start' : isCollapse ? 'justify-center' : 'ml-2',
+                                'text-sm font-medium text-text-secondary',
+                                isMobile ? (isCollapse ? 'block' : 'hidden') : isCollapse ? 'hidden' : 'block',
                             )}
                         >
-                            <RiDoorOpenLine className="h-6 w-6 flex-shrink-0" aria-hidden />
-                            <span
-                                className={cnMerge(
-                                    'text-sm font-medium text-text-secondary',
-                                    isMobile ? (isCollapse ? 'block' : 'hidden') : isCollapse ? 'hidden' : 'block',
-                                )}
-                            >
-                                {t('Setting.Logout')}
-                            </span>
-                        </button>
-                    ) : (
-                        <Stack
-                            direction="row"
-                            alignItems="center"
-                            gap={1}
-                            sx={{
-                                px: 2,
-                                py: 1,
-                                cursor: 'pointer',
-                                justifyContent: isMobile ? 'flex-start' : isCollapse ? 'center' : 'flex-start',
-                            }}
-                            onClick={() => setTriggerSwitchUser(true)}
-                        >
-                            <Avatar
-                                src={user?.image ? `${process.env.REACT_APP_IMG_URL}${user?.image}` : user?.image}
-                                sx={{
-                                    margin: !isMobile && isCollapse ? 'auto' : '0',
-                                    marginLeft: isCollapse ? 1 : 0,
-                                    height: '30px',
-                                    width: '30px',
-                                }}
-                            />
-
-                            <Stack sx={{ textAlign: 'left' }}>
-                                <Typography
-                                    sx={{
-                                        display: isMobile || !isCollapse ? '-webkit-box' : 'none',
-                                        fontSize: '0.875rem',
-                                        fontWeight: 600,
-                                        color: '#000',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        WebkitLineClamp: 2, // 👈 number of lines
-                                        WebkitBoxOrient: 'vertical',
-                                    }}
-                                >
-                                    {setting?.profile?.name}
-                                </Typography>
-                                <Typography
-                                    sx={{
-                                        display: isMobile || !isCollapse ? 'block' : 'none',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 500,
-                                        color: '#666',
-                                    }}
-                                >
-                                    {user?.name}
-                                </Typography>
-                            </Stack>
-                        </Stack>
-                    )}
-
+                            {t('Setting.Logout')}
+                        </span>
+                    </button>
                     <Divider />
-
                     <p>Version {packageJson?.version}</p>
                 </div>
             </div>
-
-            {triggerSwitchUser && (
-                <PopupForEmployee
-                    open={triggerSwitchUser}
-                    onClose={() => {
-                        setTriggerSwitchUser(false);
-                        setSelectedPopUpEmployee(null);
-                        setPopupOTPModal(false);
-                        setPasscode(['', '', '', '', '', '']);
-                    }}
-                    selectedPopUpEmployee={selectedPopUpEmployee}
-                    handleSelectPopUpEmployee={(emp: any) => setSelectedPopUpEmployee(emp)}
-                    employeeData={{
-                        profile: { employees: storeSettings?.employees.filter((emp: any) => emp.id !== user?.id) },
-                    }}
-                    handleTransferToOTP={handleTransferToOTP}
-                />
-            )}
-
-            {popupOtpModel && (
-                <PopUpForOTP
-                    open={popupOtpModel}
-                    onClose={resetStates}
-                    passcode={passcode}
-                    handlePasscodeChange={handlePasscodeChange}
-                    selectedPopUpEmployee={selectedPopUpEmployee}
-                    handleFinalSavePopuUs={handleFinalSavePopuUs}
-                />
-            )}
         </div>
     );
 });

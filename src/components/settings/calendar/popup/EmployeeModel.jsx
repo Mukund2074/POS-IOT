@@ -31,7 +31,6 @@ import FButton from '../../../commonComponents/F_Button';
 
 import { useSelector } from 'react-redux';
 import { Close } from '@mui/icons-material';
-import CustomCheckbox from '../../../commonComponents/F_Checkbox';
 export default function EmployeeModel({ open, onClose, data, setData, handleRemove }) {
     moment.locale('en');
     const [imgSource, setImgSource] = useState(null);
@@ -44,7 +43,6 @@ export default function EmployeeModel({ open, onClose, data, setData, handleRemo
 
             //     getEmployees()
             if (data) {
-                formik.setValues({ ...data, add_all_services: false, add_all_special_services: false });
                 formik.setFieldValue('country_code', data?.country_code ?? '+45');
                 // if(data?.country_code)
             }
@@ -114,8 +112,6 @@ export default function EmployeeModel({ open, onClose, data, setData, handleRemo
             image: '',
             role: 'EMPLOYEE',
             remove_image: false,
-            add_all_services: false,
-            add_all_special_services: false,
         },
         validationSchema: validationSchema,
         onSubmit: (values) => {
@@ -337,57 +333,6 @@ export default function EmployeeModel({ open, onClose, data, setData, handleRemo
                             )}
 
                             {/* </Stack> */}
-                        </Stack>
-                        <Stack
-                            flex={1}
-                            mt={1}
-                            flexDirection={'row'}
-                            justifyContent={'space-between'}
-                            alignItems={'center'}
-                        >
-                            <Stack flex={1} flexDirection={'row'} justifyContent={'flex-start'} alignItems={'center'}>
-                                <CustomCheckbox
-                                    onChange={() =>
-                                        formik.setFieldValue('add_all_services', !formik.values.add_all_services)
-                                    }
-                                    name={'add_all_services'}
-                                    id={'add_all_services'}
-                                    checked={formik.values.add_all_services}
-                                    sx={{ pb: 0.3, mb: 0 }}
-                                />
-                                <Typography
-                                    sx={{
-                                        height: 20,
-                                        fontWeight: 100,
-                                        fontFamily: 'DM Sans',
-                                    }}
-                                >
-                                    {t('Setting.allservice')}
-                                </Typography>
-                            </Stack>
-                            <Stack flex={1} flexDirection={'row'} justifyContent={'flex-start'} alignItems={'center'}>
-                                <CustomCheckbox
-                                    onChange={() =>
-                                        formik.setFieldValue(
-                                            'add_all_special_services',
-                                            !formik.values.add_all_special_services
-                                        )
-                                    }
-                                    name={'add_all_special_services'}
-                                    id={'add_all_special_services'}
-                                    checked={formik.values.add_all_special_services}
-                                    sx={{ pb: 0.3, mb: 0 }}
-                                />
-                                <Typography
-                                    sx={{
-                                        height: 20,
-                                        fontWeight: 100,
-                                        fontFamily: 'DM Sans',
-                                    }}
-                                >
-                                    {t('Setting.allSpecialoffer')}
-                                </Typography>
-                            </Stack>
                         </Stack>
 
                         <Stack flex={1} flexDirection={'column'} sx={{ mt: 2 }}>

@@ -36,4 +36,3 @@ export * from './api/customer';
 // ===========================================
 //  Doctor portal
 // ===========================================
-export * from './api/doctorPortal';
