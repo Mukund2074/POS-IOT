@@ -1,0 +1,68 @@
+/* Week View Modal Positioning Fixes */
+.week-view-modal {
+    z-index: 9999 !important;
+}
+
+.week-view-modal .MuiPopover-paper {
+    margin-top: 8px !important;
+}
+
+/* Calendar header positioning improvements */
+.rbc-header {
+    position: relative !important   ;
+    z-index: 1 !important;
+    border-right: 1px solid #ddd !important;
+}
+
+.rbc-time-header {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Ensure proper stacking context */
+.rbc-calendar {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Week view specific styling */
+.rbc-time-view .rbc-header {
+    cursor: pointer !important;
+    padding: 0 !important;
+    position: relative !important;
+    min-height: 50px !important;
+}
+
+/* Ensure the entire header content is clickable */
+.rbc-time-view .rbc-header > * {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Ensure the time header row is positioned correctly */
+.rbc-time-header-content {
+    position: relative !important;
+}
+
+/* Make sure header cells are properly positioned */
+.rbc-time-header .rbc-header {
+    position: relative !important;
+    min-height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Week view modal specific positioning */
+.week-view-modal .MuiPopover-root {
+    z-index: 9999 !important;
+}
+
+/* Override any calendar z-index issues */
+.rbc-calendar .week-view-modal {
+    z-index: 9999 !important;
+}

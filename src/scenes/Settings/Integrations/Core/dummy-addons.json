@@ -1,0 +1,74 @@
+{
+  "data": {
+    "data": [
+      {
+        "categoryId": 1,
+        "category": "POS",
+        "addons": [
+          {
+            "id": 1,
+            "label": "Dinero",
+            "isActive": false,
+            "meta": null
+          },
+          {
+            "id": 2,
+            "label": "Economic",
+            "isActive": false,
+            "meta": {
+              "authUrl": "https://example.com/economic/auth"
+            }
+          }
+        ]
+      },
+      {
+        "categoryId": 3,
+        "category": "Rating and Review",
+        "addons": [
+          {
+            "id": 7,
+            "label": "Trustpilot",
+            "isActive": false,
+            "meta": null
+          }
+        ]
+      },
+      {
+        "categoryId": 4,
+        "category": "CRM",
+        "addons": [
+          {
+            "id": 8,
+            "label": "Klaviyo",
+            "isActive": false,
+            "meta": null
+          },
+          {
+            "id": 10,
+            "label": "Webhook",
+            "isActive": false,
+            "meta": null
+          }
+        ]
+      },
+      {
+        "categoryId": 5,
+        "category": "Sync Bookings",
+        "addons": [
+          {
+            "id": 9,
+            "label": "Google Calendar",
+            "isActive": false,
+            "meta": null
+          },
+          {
+            "id": 11,
+            "label": "Calendly",
+            "isActive": false,
+            "meta": null
+          }
+        ]
+      }
+    ]
+  }
+}

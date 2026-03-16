@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <path d="M21 6L9 6M21 12L9 12M21 18L9 18"
+        stroke="#010101"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <text x="3.5" y="7.5"
+        font-size="6"
+        font-family="Arial, sans-serif"
+        fill="#010101"
+        text-anchor="middle">1</text>
+
+  <text x="3.5" y="13.5"
+        font-size="6"
+        font-family="Arial, sans-serif"
+        fill="#010101"
+        text-anchor="middle">2</text>
+
+  <text x="3.5" y="19.5"
+        font-size="6"
+        font-family="Arial, sans-serif"
+        fill="#010101"
+        text-anchor="middle">3</text>
+</svg>

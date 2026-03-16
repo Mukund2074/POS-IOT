@@ -1,0 +1,32 @@
+/* Tailwind CSS with layers to prevent MUI conflicts */
+/* IMPORTANT: This CSS file is ONLY imported in MarketingLayout, so Tailwind styles only apply to marketing routes */
+@layer tailwind-base {
+    @tailwind base;
+}
+
+@layer tailwind-components {
+    @tailwind components;
+}
+
+/* Remove layer wrapper for utilities to fix media query specificity with important: true */
+/* Media queries need to be at the same layer level as base utilities for proper override */
+@tailwind utilities;
+
+.btn-fs {
+    font-size: var(--fs);
+}
+
+
+/* 
+  CSS Layers order (from lowest to highest priority):
+  1. tailwind-base (lowest)
+  2. tailwind-components
+  3. MUI styles (default layer)
+  4. tailwind-utilities (highest - can override MUI if needed, but we avoid this)
+  
+  This ensures Tailwind doesn't interfere with MUI components.
+  Only use Tailwind classes on Radix components or custom HTML elements.
+  
+  IMPORTANT: This file is ONLY imported in MarketingLayout component.
+  Tailwind CSS will NOT be loaded or affect any routes outside /marketing.
+*/

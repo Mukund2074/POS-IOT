@@ -1,0 +1,18 @@
+  <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="35"
+                                        height="35"
+                                        viewBox="0 0 200 200"
+                                    >
+                                        <circle
+                                            cx="100"
+                                            cy="100"
+                                            r="90"
+                                            fill="white"
+                                            stroke="#BBB0A4"
+                                            stroke-width="5"
+                                        />
+                                        <circle cx="100" cy="80" r="25" fill="#0FA628" />
+                                        <ellipse cx="100" cy="135" rx="35" ry="25" fill="#0FA628" />
+                                    </svg>
+                            

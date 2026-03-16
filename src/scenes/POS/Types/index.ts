@@ -1,0 +1,1 @@
+export type ToastSchema = (message: string, type: 'success' | 'error') => void;
