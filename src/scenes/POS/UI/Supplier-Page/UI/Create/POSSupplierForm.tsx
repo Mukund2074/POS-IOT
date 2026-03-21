@@ -35,7 +35,8 @@ export default function POSSupplierForm() {
         contactPersonName: '',
         contactPersonEmail: '',
         contactPersonPhone: '',
-        countryCode: '+45',
+        countryCode: '+91',
+        countryISOCode: 'IN',
     });
     const [phoneLength, setPhoneLength] = useState<{ minLength: number; maxLength: number }>({
         minLength: 8,
@@ -362,7 +363,7 @@ export default function POSSupplierForm() {
                                         value={{
                                             country_code: formik?.values?.countryCode ?? '',
                                             phone: formik?.values?.contactPersonPhone ?? '',
-                                            countryISOCode: formik?.values?.countryISOCode ?? 'DK',
+                                            countryISOCode: formik?.values?.countryISOCode ?? 'IN',
                                         }}
                                         onChange={(e) => {
                                             formik.setFieldValue('contactPersonPhone', e);

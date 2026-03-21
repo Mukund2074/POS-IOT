@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useCustomerItems } from '../../../../hooks/index';
 import { useParams } from 'react-router-dom';
-import { Stack } from '@mui/material';
-import FPrimaryHeading from '../../../commonComponents/F_PrimaryHeading';
+import { Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 import moment from 'moment';
-import FCommonTable from '../../../commonComponents/F_commonTable';
+import RadixTable from '@/components/radix/RadixTable';
 
 export default function PunchCardsCustomer() {
     const params = useParams();
@@ -46,8 +45,7 @@ export default function PunchCardsCustomer() {
             usageStatus: item?.status,
             services: !item?.applicableServices?.services
                 ? '-'
-                : // If services is an object with keys
-                  Object.keys(item?.applicableServices?.services).length > 0
+                : Object.keys(item?.applicableServices?.services).length > 0
                   ? Object.values(item?.applicableServices?.services)
                         .map((service) => service?.name || '')
                         .join(', ')
@@ -55,22 +53,35 @@ export default function PunchCardsCustomer() {
             receiptDate: moment(item?.receiptDate).format('DD/MM-YYYY HH:mm'),
         }));
 
+    const visible = [
+        'bundleOfferCode',
+        'bundleOfferName',
+        'residuePunches',
+        'services',
+        'usageStatus',
+        'receiptDate',
+    ];
+
+    const radixColumns = useMemo(
+        () =>
+            columns
+                .filter((c) => visible.includes(c.id))
+                .map((c) => ({
+                    id: c.id,
+                    name: c.label,
+                    sortable: c.sortable,
+                    selector: (row) => row[c.id] ?? '',
+                })),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [t, isLoading],
+    );
+
     return (
         <Stack>
-            <FPrimaryHeading sx={{ mt: 4, mb: 2 }} text={t('Customer.PunchCards')} />
-            <FCommonTable
-                loading={isLoading}
-                columns={columns}
-                data={dataForTable || []}
-                visibleColumns={[
-                    'bundleOfferCode',
-                    'bundleOfferName',
-                    'residuePunches',
-                    'services',
-                    'usageStatus',
-                    'receiptDate',
-                ]}
-            />
+            <Typography sx={{ mt: 4, mb: 2, color: '#545454', fontSize: '22px' }} variant="h6">
+                {t('Customer.PunchCards')}
+            </Typography>
+            <RadixTable loading={isLoading} columns={radixColumns} data={dataForTable || []} />
         </Stack>
     );
 }

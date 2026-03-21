@@ -35,11 +35,13 @@ const LoginFlow = () => {
     const [resetPassToken, setResPassToken] = useState('');
     const [locations, setLocations] = useState([]);
     const [employees, setEmployees] = useState([]);
-    const [phone_number, setPhoneNumber] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [imageUrl, setImageUrl] = useState([]);
     const auth_token = localStorage.getItem('auth_token');
 
     const [phone, setPhone] = useState('');
+    const [countryCode, setCountryCode] = useState('+91');
+    const [countryISOCode, setCountryISOCode] = useState('IN');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
     const [loginData, setLoginData] = useState([]);
@@ -48,7 +50,7 @@ const LoginFlow = () => {
     const { refreshSettings } = useData();
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const isAppFromURL = params.get('from_app')
+        const isAppFromURL = params.get('from_app');
         if (auth_token && !isAppFromURL) {
             navigate('/calendar', { replace: true }); // Prevents adding duplicate history entries
             // Ensure Redux store is hydrated before calling refreshSettings
@@ -63,7 +65,9 @@ const LoginFlow = () => {
     const OTPSending = async ({ setter, phoneNumber }) => {
         try {
             setter(true);
-            const response = await requestOTPApi({ payload: { phone_number: phoneNumber, country_code: '+45' } });
+            const response = await requestOTPApi({
+                payload: { phone_number: phoneNumber, country_code: countryCode },
+            });
             if (response.status === HttpStatusCode.Ok) {
                 toast.success('OTP sent successfully');
                 return true;
@@ -78,6 +82,8 @@ const LoginFlow = () => {
     async function aftersuccessfulReset() {
         setResStep(0);
         setPhone('');
+        setCountryCode('+91');
+        setCountryISOCode('IN');
         setStep(1);
         // Clear all cached data after successful password reset
         await clearCacheBeforeLogin(queryClient);
@@ -86,7 +92,7 @@ const LoginFlow = () => {
     const handleLogin = async () => {
         try {
             const payload = {
-                country_code: '+45',
+                country_code: countryCode,
                 phone_number: phone.replace(/\s/g, ''),
                 password: password,
             };
@@ -117,25 +123,6 @@ const LoginFlow = () => {
             console.log('error When trying to login', error);
             toast.error('Login failed. Please try again.');
         }
-    };
-
-    // Function to test Sentry error reporting
-    const testSentryError = () => {
-        try {
-            // Intentionally throw an error to test Sentry
-            throw new Error('This is a test error for Sentry');
-        } catch (error) {
-            // Let Sentry capture the error
-            Sentry.captureException(error);
-            toast.info('Test error sent to Sentry');
-        }
-    };
-
-    // Function to test unhandled error for Sentry
-    const testUnhandledError = () => {
-        // This will crash the component and be caught by Sentry automatically
-        const nonExistentObject = null;
-        nonExistentObject.someProperty = 'This will cause a TypeError';
     };
 
     useEffect(() => {
@@ -296,11 +283,6 @@ const LoginFlow = () => {
         }
     };
 
-    const handlePhoneInput = (e) => {
-        let input = e.target.value.replace(/[^0-9]/g, '');
-        setPhone(input);
-    };
-
     return (
         <Stack
             sx={{
@@ -308,25 +290,24 @@ const LoginFlow = () => {
                 width: '100%',
                 overflow: 'hidden',
                 p: { xs: 2, md: 10 },
-                backgroundColor: '#BBB0A4',
+                backgroundColor: '#f5f5f5',
             }}
         >
-            <img
-                src={logo}
-                height={'60px'}
-                width={'60px'}
-                style={{ marginLeft: 'auto', marginRight: 'auto' }}
-                alt="logo"
-            />
-
             <Stack sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                 {step === 1 && (
                     <LoginForm
                         handleLogin={handleLogin}
                         phone={phone}
+                        countryCode={countryCode}
+                        countryISOCode={countryISOCode}
                         password={password}
                         setPassword={setPassword}
-                        handlePhoneInput={handlePhoneInput}
+                        handlePhoneChange={(value) => {
+                            setPhone(value?.phone ?? '');
+                            setPhoneNumber(value?.phone ?? '');
+                            setCountryCode(value?.country_code ?? '+91');
+                            setCountryISOCode(value?.countryISOCode ?? 'IN');
+                        }}
                         handleResetPass={handleResetPass}
                     />
                 )}
@@ -362,6 +343,12 @@ const LoginFlow = () => {
                     <ResNumberInForm
                         OTPSending={OTPSending}
                         phone={phone}
+                        countryCode={countryCode}
+                        countryISOCode={countryISOCode}
+                        onPhoneChange={(value) => {
+                            setCountryCode(value?.country_code ?? '+91');
+                            setCountryISOCode(value?.countryISOCode ?? 'IN');
+                        }}
                         handleResetPass={handleResetPass}
                         setPhoneNumber={setPhoneNumber}
                         backButton={backButton}
@@ -371,7 +358,8 @@ const LoginFlow = () => {
                 {resStep === 2 && step === 0 && (
                     <VerificationCode
                         OTPSending={OTPSending}
-                        phone_number={phone_number}
+                        phoneNumber={phoneNumber}
+                        country_code={countryCode}
                         handleResBack={handleResBack}
                         handleResetPass={handleResetPass}
                         setResPassToken={setResPassToken}

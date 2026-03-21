@@ -1,114 +1,165 @@
-import { Box, Button, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Button, IconButton, Stack, Typography, Zoom } from '@mui/material';
 import React from 'react';
 import finalr from '../../assets/finalr.png';
-import { t } from 'i18next';
+import theme from '../../ui/theme'; // Using your design tokens
+import { CheckCircleRounded, ArrowForwardRounded } from '@mui/icons-material';
 
-const FinalresetpassbookingModel = ({ handleResBack, backButton, onSubmit }) => {
+const FinalresetpassbookingModel = ({ handleResBack, onSubmit }) => {
     return (
         <Box
             noValidate
             component={'form'}
             sx={{
-                width: '90%', // Makes it responsive
-                maxWidth: '500px', // Limits max width for larger screens
-                minWidth: '320px', // Ensures it doesn't shrink too much
-                maxHeight: '80%',
-                backgroundColor: 'white',
-                borderRadius: '25px',
+                width: '100%',
+                maxWidth: '520px',
+                bgcolor: '#FFFFFF',
+                borderRadius: '44px',
+                p: { xs: 4, md: 6 },
+                boxShadow: '0px 40px 80px -20px rgba(0, 0, 0, 0.12)',
+                border: `1px solid ${theme.colors.grey[100]}`,
                 display: 'flex',
                 flexDirection: 'column',
-                padding: '20px 30px',
-                paddingBottom: '0px',
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)', // Adds subtle shadow
-                alignItems: 'center', // Centers content
+                alignItems: 'center',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden',
             }}
         >
-            <Stack
+            {/* OPTIONAL: LIGHT BACKGROUND ACCENT */}
+            <Box
                 sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    width: '100%',
-                    position: 'relative',
+                    position: 'absolute',
+                    top: -100,
+                    width: 300,
+                    height: 300,
+                    background: `radial-gradient(circle, ${theme.colors.secondary[50]} 0%, transparent 70%)`,
+                    zIndex: 0,
                 }}
-            >
-                <IconButton
-                    aria-label="close"
-                    disableRipple
-                    sx={{
-                        position: 'absolute',
-                        left: { xs: 2, md: 8 },
+            />
 
-                        color: '#6f6f6f',
-                    }}
-                    onClick={handleResBack}
-                >
-                    <img src={backButton} alt="Back" />
-                </IconButton>
-
+            {/* BRANDING HEADER */}
+            <Stack direction="row" alignItems="baseline" sx={{ mb: 4, zIndex: 1 }}>
                 <Typography
-                    variant="body1"
-                    sx={{
-                        fontSize: '25px',
-                        fontWeight: '400',
-                        color: '#6F6F6F',
-                        textAlign: 'center',
-                    }}
+                    sx={{ fontSize: '3em', fontWeight: 900, color: theme.colors.grey[950], letterSpacing: '-1px' }}
                 >
-                    {t('Common.SuccessResspass')}
+                    POS
+                </Typography>
+                <Typography sx={{ fontSize: '2em', fontWeight: 700, color: theme.colors.primary[500], ml: 0.5 }}>
+                    IoT
                 </Typography>
             </Stack>
-            <Typography variant="body2" color="#4B4B4B" mt={2}>
-                {' '}
-                {t('Common.SuccessrespassDesc')}
-            </Typography>
 
-            <Stack
-                sx={{
-                    height: '100%',
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                    p: 2,
-                    gap: 2,
-                }}
-            >
-                <IconButton
+            {/* SUCCESS ICON WITH HALO */}
+            <Zoom in={true} style={{ transitionDelay: '200ms' }}>
+                <Box
                     sx={{
-                        width: 135,
-                        height: 135,
-                        bgcolor: 'grey.100',
-                        borderRadius: '50%',
+                        position: 'relative',
+                        mb: 5,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                     }}
                 >
-                    <img src={finalr} alt="logo" height={100} />
-                </IconButton>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            width: 180,
+                            height: 180,
+                            bgcolor: theme.colors.secondary[50],
+                            borderRadius: '50%',
+                            zIndex: 0,
+                            animation: 'pulse 3s infinite ease-in-out',
+                        }}
+                    />
+                    <IconButton
+                        sx={{
+                            width: 140,
+                            height: 140,
+                            bgcolor: '#FFFFFF',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+                            borderRadius: '50%',
+                            zIndex: 1,
+                            '&:hover': { bgcolor: '#FFFFFF' },
+                        }}
+                    >
+                        <img src={finalr} alt="Success" height={80} />
+                    </IconButton>
+                    <CheckCircleRounded
+                        sx={{
+                            position: 'absolute',
+                            bottom: 5,
+                            right: 15,
+                            fontSize: 45,
+                            color: theme.colors.secondary[500],
+                            bgcolor: '#FFF',
+                            borderRadius: '50%',
+                            zIndex: 2,
+                        }}
+                    />
+                </Box>
+            </Zoom>
 
-                {/* Login Button */}
-                <Button
-                    type="submit"
-                    onClick={onSubmit}
+            {/* TEXT CONTENT */}
+            <Stack spacing={1.5} sx={{ zIndex: 1, mb: 6 }}>
+                <Typography
                     sx={{
-                        width: '100%',
-                        maxWidth: '200px',
-                        borderRadius: 12,
-                        height: 40,
-
-                        fontSize: '17px',
-                        fontWeight: '400',
-                        color: 'white',
-                        backgroundColor: '#BBB0A4',
-                        textTransform: 'capitalize',
-                        '&:hover': { backgroundColor: '#9C968B' },
+                        fontSize: '32px',
+                        fontWeight: 900,
+                        color: theme.colors.grey[950],
+                        letterSpacing: '-1.5px',
+                        lineHeight: 1,
                     }}
                 >
-                    {t('Common.SuccessresPasBTn')}
-                </Button>
+                    Password reset successful
+                </Typography>
+                <Typography
+                    sx={{
+                        fontSize: '16px',
+                        color: theme.colors.grey[500],
+                        fontWeight: 500,
+                        px: 2,
+                    }}
+                >
+                    Your password has been reset successfully
+                </Typography>
             </Stack>
+
+            {/* FINAL ACTION BUTTON */}
+            <Button
+                variant="contained"
+                onClick={onSubmit}
+                endIcon={<ArrowForwardRounded />}
+                sx={{
+                    width: '100%',
+                    py: 2.2,
+                    borderRadius: '24px',
+                    fontSize: '18px',
+                    fontWeight: 900,
+                    textTransform: 'none',
+                    bgcolor: theme.colors.grey[950], // High-contrast black
+                    color: '#FFFFFF',
+                    boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
+                    zIndex: 1,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                        bgcolor: theme.colors.grey[800],
+                        transform: 'translateY(-2px)',
+                    },
+                }}
+            >
+                Continue to login
+            </Button>
+
+            {/* KEYFRAME ANIMATION (Add this to your global CSS or a styled component) */}
+            <style>
+                {`
+                @keyframes pulse {
+                    0% { transform: scale(0.95); opacity: 0.5; }
+                    50% { transform: scale(1.05); opacity: 0.8; }
+                    100% { transform: scale(0.95); opacity: 0.5; }
+                }
+                `}
+            </style>
         </Box>
     );
 };

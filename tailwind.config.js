@@ -3,16 +3,7 @@ const { screens } = require('./src/theme/screens');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: [
-        // Only scan marketing routes and Radix components (used only in marketing)
-        './src/scenes/Marketing/**/*.{js,jsx,ts,tsx}',
-        './src/components/radix/**/*.{js,jsx,ts,tsx}',
-        './src/components/Marketing/**/*.{js,jsx,ts,tsx}',
-        './src/components/Sidebar.tsx',
-        './src/scenes/Unauthorized/Unauthorized.jsx',
-        './src/scenes/Doctors/**/*.{js,jsx,ts,tsx}',
-        './src/**/*.{js,jsx,ts,tsx}',
-    ],
+    content: ['./src/**/*.{js,jsx,ts,tsx}'],
 
     darkMode: 'class',
 

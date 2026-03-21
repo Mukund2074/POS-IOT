@@ -1,301 +1,209 @@
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  IconButton,
-  InputAdornment,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import React, { useState } from "react";
-import lock from "../../assets/lock.png";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { toast } from "react-toastify";
-import { t } from "i18next";
-import { resetPasswordApi } from "../../utils/Api/Authantication";
-import { HttpStatusCode } from "axios";
+import { Visibility, VisibilityOff, LockOpenRounded, ArrowBackIosNewRounded } from '@mui/icons-material';
+import { Box, Button, IconButton, InputAdornment, Stack, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { toast } from 'react-toastify';
+import { resetPasswordApi } from '../../utils/Api/Authantication';
+import { HttpStatusCode } from 'axios';
+import theme from '../../ui/theme'; // Using your design tokens
+import { ShieldCheck } from 'lucide-react';
 
-const ConfirmPass = ({ backButton, handleResBack, handleResetPass, token }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isPending, setIspending] = useState(false)
+const ConfirmPass = ({ handleResBack, handleResetPass, token }) => {
+    const [showPassword, setShowPassword] = useState(false);
+    const [isPending, setIspending] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const validationSchema = Yup.object({
+        password: Yup.string().min(6, 'Min 6 characters').required('Password is required'),
+        confirm_password: Yup.string()
+            .oneOf([Yup.ref('password'), null], 'Passwords must match')
+            .required('Confirm password is required'),
+    });
 
-  const validationSchema = Yup.object({
-    password: Yup.string().required("Password is required"),
-    confirm_password: Yup.string()
-      .oneOf([Yup.ref("password"), null], "Passwords must match")
-      .required("Confirm Password is required"),
-  });
+    const formik = useFormik({
+        initialValues: { password: '', confirm_password: '' },
+        validationSchema,
+        onSubmit: async (values) => {
+            try {
+                setIspending(true);
+                const response = await resetPasswordApi({ token, password: values.password });
+                if (response.status === HttpStatusCode.Ok) {
+                    toast.success('Security Updated');
+                    handleResetPass();
+                }
+            } catch (error) {
+                toast.error('Update Failed');
+            } finally {
+                setIspending(false);
+            }
+        },
+    });
 
-  const formik = useFormik({
-    initialValues: {
-      password: "",
-      confirm_password: "", // Fixed the key name
-    },
-    validationSchema, // Fixed incorrect assignment
-    onSubmit: async (values) => {
-      try {
-        setIspending(true)
-        const response = await resetPasswordApi({ token, password: values.password });
-        if (response.status === HttpStatusCode.Ok) {
-          toast.success("Password updated  successfully");
-          handleResetPass();
-        }
-      } catch (error) {
-        toast.error("Something went wrong");
-      } finally {
-        setIspending(false)
-      }
-    },
-  });
-
-  return (
-    <Box
-      noValidate
-      component={"form"}
-      sx={{
-        width: "90%", // Makes it responsive
-        maxWidth: "500px", // Limits max width for larger screens
-        minWidth: "320px", // Ensures it doesn't shrink too much
-        // height: "65%",
-        backgroundColor: "white",
-        borderRadius: "25px",
-        display: "flex",
-        flexDirection: "column",
-        padding: "20px 30px",
-        paddingBottom: "0px",
-        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Adds subtle shadow
-        alignItems: "center", // Centers content
-      }}
-    >
-      <Stack
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-          position: "relative",
-        }}
-      >
-        <IconButton
-          aria-label="close"
-          disableRipple
-          sx={{
-            position: "absolute",
-            left: { xs: -8, md: 5 },
-
-            color: "#6f6f6f",
-          }}
-          onClick={handleResBack}
-        >
-          <img src={backButton} alt="Back" />
-        </IconButton>
-
-        <Typography
-          sx={{
-            fontSize: "25px",
-            fontWeight: "400",
-            color: "#6F6F6F",
-            textAlign: "center",
-          }}
-        >
-          {t("Common.ResPassConfT")}
-        </Typography>
-      </Stack>
-
-
-      <Stack sx={{ width: "100%", px: { xs: 1, md: 9 }, mt: "20px" }}>
-        <Typography variant="body2" color="#4B4B4B" textAlign="center">
-          {t("Common.resConfD1")}
-          <br />
-          {t("Common.resConfD2")}
-        </Typography>
-      </Stack>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          marginTop: 5,
-          px: { xs: 2, md: 4 },
-        }}
-      >
+    return (
         <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            marginBottom: "5px",
-          }}
+            component={'form'}
+            noValidate
+            sx={{
+                width: '100%',
+                maxWidth: '520px',
+                bgcolor: '#FFFFFF',
+                borderRadius: '44px',
+                p: { xs: 4, md: 6 },
+                boxShadow: '0px 40px 80px -20px rgba(0, 0, 0, 0.12)',
+                border: `1px solid ${theme.colors.grey[100]}`,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+            }}
         >
-          <Stack
-            component="img"
-            src={lock}
-            alt="call"
-            sx={{ height: "17px" }}
-          />
-          <Typography fontSize="17px" fontWeight="400" color="#6F6F6F">
-            {t("Common.NewPassP")}
-          </Typography>
-        </Box>
-
-
-        <TextField
-          id="password"
-          type={showPassword ? "text" : "password"}
-          variant="standard"
-          placeholder={t("Common.NewPassP")}
-          borderColor="#D9D9D9"
-          placeholderFontSize="1rem"
-          inputFontSize="1rem"
-          size="small"
-          borderThickness="1px"
-          //   value={password.replace(/\s/g, "")}
-          value={formik.values.password.replace(/\s/g, "")}
-          onChange={(e) => {
-            const { value } = e.target;
-            formik.setFieldValue("password", value);
-          }}
-          InputProps={{
-            disableUnderline: true,
-            style: {
-              width: "100%",
-              backgroundColor: "transparent",
-              paddingLeft: 20,
-              fontSize: "16px",
-            },
-            endAdornment: (
-              <InputAdornment position="end" sx={{ marginRight: "10px" }}>
-                <IconButton onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            width: "100%",
-            "& input": { outline: "none" },
-            border: "1px solid #D9D9D9",
-            borderRadius: "10px",
-            backgroundColor: "#fff",
-          }}
-        />
-        {formik.touched.password && formik.errors.password && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography variant="caption" color="red">
-              {formik.errors.password}
-            </Typography>
-          </Box>
-        )}
-
-      </Box>
-
-      {/* Confirm Password Input */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          marginTop: "20px",
-          px: { xs: 2, md: 4 },
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            marginBottom: "5px",
-          }}
-        >
-          <Stack
-            component="img"
-            src={lock}
-            alt="lock"
-            sx={{ height: "17px" }}
-          />
-          <Typography fontSize="16px" fontWeight="400" color="#6F6F6F">
-            {t("Common.ConfPassp")}
-          </Typography>
-        </Box>
-
-        <TextField
-          id="confirm_password"
-          type={showConfirmPassword ? "text" : "password"}
-          variant="standard"
-          placeholder={t("Common.ConfPassp")}
-          borderColor="#D9D9D9"
-          placeholderFontSize="1rem"
-          inputFontSize="1rem"
-          size="small"
-          borderThickness="1px"
-          value={formik.values.confirm_password.replace(/\s/g, "")}
-          onChange={(e) =>
-            formik.setFieldValue(
-              "confirm_password",
-              e.target.value.replace(/\s/g, "")
-            )
-          }
-          InputProps={{
-            disableUnderline: true,
-            style: {
-              width: "100%",
-              backgroundColor: "transparent",
-              paddingLeft: 20,
-              fontSize: "16px",
-            },
-            endAdornment: (
-              <InputAdornment position="end" sx={{ marginRight: "10px" }}>
-                <IconButton
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            {/* BRANDING HEADER */}
+            <Stack direction="row" alignItems="baseline" sx={{ mb: 2 }}>
+                <Typography
+                    sx={{ fontSize: '3em', fontWeight: 900, color: theme.colors.grey[950], letterSpacing: '-1px' }}
                 >
-                  {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            width: "100%",
-            "& input": { outline: "none" },
-            border: "1px solid #D9D9D9",
-            borderRadius: "10px",
-            backgroundColor: "#fff",
-          }}
-        />
-        {formik.touched.confirm_password && formik.errors.confirm_password && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography variant="caption" color="red">
-              {formik.errors.confirm_password}
-            </Typography>
-          </Box>
-        )}
-      </Box>
+                    POS
+                </Typography>
+                <Typography sx={{ fontSize: '2em', fontWeight: 700, color: theme.colors.primary[500], ml: 0.5 }}>
+                    IoT
+                </Typography>
+            </Stack>
 
-      {/* Login Button */}
-      <Button
-        loading={isPending}
-        type="submit"
-        onClick={formik.handleSubmit}
-        sx={{
-          width: "100%",
-          maxWidth: { xs: "100%", md: "210px" },
-          borderRadius: "25px",
-          height: "40px",
-          my: 3,
-          fontSize: "17px",
-          fontWeight: "400",
-          color: "white",
-          backgroundColor: "#BBB0A4",
-          textTransform: "capitalize",
-          "&:hover": { backgroundColor: "#9C968B" },
-        }}
-      >
-        {t("Common.ResOTpSubBTN")}
-      </Button>
-    </Box>
-  );
+            {/* HEADER WITH BACK */}
+            <Stack direction="row" alignItems="center" sx={{ width: '100%', mb: 4 }}>
+                <IconButton onClick={handleResBack} sx={{ bgcolor: theme.colors.grey[50], mr: 2, p: 1.5 }}>
+                    <ArrowBackIosNewRounded sx={{ fontSize: '18px' }} />
+                </IconButton>
+                <Typography
+                    sx={{ fontSize: '27px', fontWeight: 800, color: theme.colors.grey[900], letterSpacing: '-1.5px' }}
+                >
+                    Create new password
+                </Typography>
+            </Stack>
+
+            <Stack spacing={4} sx={{ width: '100%' }}>
+                {/* DESCRIPTION BOX */}
+                <Box sx={{ bgcolor: theme.colors.primary[50], p: 2, borderRadius: '20px', textAlign: 'center' }}>
+                    <Typography sx={{ fontSize: '14px', fontWeight: 600, color: theme.colors.primary[700] }}>
+                        Your new password must be different from previously used passwords
+                    </Typography>
+                </Box>
+
+                {/* PASSWORD FIELD */}
+                <Stack spacing={1}>
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ ml: 1 }}>
+                        <LockOpenRounded sx={{ fontSize: '18px', color: theme.colors.primary[500] }} />
+                        <Typography
+                            sx={{
+                                fontSize: '13px',
+                                fontWeight: 800,
+                                color: theme.colors.grey[700],
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px',
+                            }}
+                        >
+                            New password
+                        </Typography>
+                    </Stack>
+                    <TextField
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        variant="outlined"
+                        placeholder="••••••••"
+                        value={formik.values.password.replace(/\s/g, '')}
+                        onChange={formik.handleChange}
+                        error={formik.touched.password && Boolean(formik.errors.password)}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '20px',
+                                bgcolor: theme.colors.grey[50],
+                                '& fieldset': { borderColor: theme.colors.grey[100], borderWidth: '2px' },
+                                '&.Mui-focused fieldset': { borderColor: theme.colors.primary[500] },
+                            },
+                        }}
+                    />
+                </Stack>
+
+                {/* CONFIRM PASSWORD FIELD */}
+                <Stack spacing={1}>
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ ml: 1 }}>
+                        <ShieldCheck sx={{ fontSize: '18px', color: theme.colors.primary[500] }} />
+                        <Typography
+                            sx={{
+                                fontSize: '13px',
+                                fontWeight: 800,
+                                color: theme.colors.grey[700],
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px',
+                            }}
+                        >
+                            Confirm password
+                        </Typography>
+                    </Stack>
+                    <TextField
+                        id="confirm_password"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        variant="outlined"
+                        placeholder="••••••••"
+                        value={formik.values.confirm_password.replace(/\s/g, '')}
+                        onChange={formik.handleChange}
+                        error={formik.touched.confirm_password && Boolean(formik.errors.confirm_password)}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                                        {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '20px',
+                                bgcolor: theme.colors.grey[50],
+                                '& fieldset': { borderColor: theme.colors.grey[100], borderWidth: '2px' },
+                                '&.Mui-focused fieldset': { borderColor: theme.colors.primary[500] },
+                            },
+                        }}
+                    />
+                    {formik.touched.confirm_password && formik.errors.confirm_password && (
+                        <Typography variant="caption" color="error" sx={{ ml: 1, fontWeight: 700 }}>
+                            {formik.errors.confirm_password}
+                        </Typography>
+                    )}
+                </Stack>
+
+                {/* SUBMIT BUTTON */}
+                <Button
+                    loading={isPending}
+                    variant="contained"
+                    onClick={formik.handleSubmit}
+                    sx={{
+                        py: 2.2,
+                        width: '100%',
+                        borderRadius: '24px',
+                        fontSize: '17px',
+                        fontWeight: 900,
+                        textTransform: 'none',
+                        bgcolor: theme.colors.grey[950],
+                        boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
+                        '&:hover': { bgcolor: theme.colors.grey[800], transform: 'translateY(-2px)' },
+                    }}
+                >
+                    Confirm
+                </Button>
+            </Stack>
+        </Box>
+    );
 };
 
 export default ConfirmPass;

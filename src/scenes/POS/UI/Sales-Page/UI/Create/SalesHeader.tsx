@@ -12,9 +12,13 @@ import { EmployeeListingSchema } from '../../Types/sales.types';
 import { useCustomer } from '@/hooks/api/pos';
 import { GetApiCustomers200CustomersItem } from '@/shared/api/models';
 import OutstandigConfirmation from './Modals/OutstandigConfirmation';
-// @ts-ignore
-import CreateCustomerForm from '@/components/calanderComponents/booking/createCustomerModal';
 import { useDebounce } from '@/hooks/shared';
+import RadixDialog from '@/components/radix/RadixDialog';
+import RadixInput from '@/components/radix/RadixInput';
+import RadixButton from '@/components/radix/RadixButton';
+// @ts-ignore
+import { CreateCustomerApi } from '@/utils/Api/Customer';
+import { toast } from 'react-toastify';
 import { CartOverride } from '@/types/CartContext.type';
 
 const AddNewCustomerData: GetApiCustomers200CustomersItem = {
@@ -38,6 +42,9 @@ export default memo(function SalesHeader({ hasSavedCart }: { hasSavedCart: boole
     });
     const [outstandingModal, setOutstandingModal] = useState<boolean>(false);
     const [createCustomerModal, setCreateCustomerModal] = useState<boolean>(false);
+    const [createName, setCreateName] = useState('');
+    const [createPhone, setCreatePhone] = useState('');
+    const [createLoading, setCreateLoading] = useState(false);
     const [inputValue, setInputValue] = useState<string>('');
     const debouncedSearchTerm = useDebounce(inputValue, 500);
 
@@ -236,23 +243,114 @@ export default memo(function SalesHeader({ hasSavedCart }: { hasSavedCart: boole
                 />
             )}
 
-            {createCustomerModal && (
-                <CreateCustomerForm
-                    setCustomer={(customerList: GetApiCustomers200CustomersItem[]) => {
-                        setSelectedCustomer(customerList[1]);
-                        setCart((prev: CartOverride) => ({
-                            ...prev,
-                            customerId: customerList[1].id,
-                            customerName: customerList[1].name,
-                            customer: customerList[1],
-                        }));
+            <RadixDialog
+                open={createCustomerModal}
+                onOpenChange={(open) => {
+                    if (!open) {
                         setCreateCustomerModal(false);
+                        setCreateName('');
+                        setCreatePhone('');
+                    }
+                }}
+                title={t('Customer.AddNewCustomer')}
+                footer={
+                    <div className="flex gap-2 justify-end w-full">
+                        <RadixButton
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setCreateCustomerModal(false);
+                                setCreateName('');
+                                setCreatePhone('');
+                            }}
+                        >
+                            {t('Common.Cancel')}
+                        </RadixButton>
+                        <RadixButton
+                            type="submit"
+                            form="sales-create-customer"
+                            variant="primary"
+                            disabled={createLoading}
+                        >
+                            {createLoading ? t('Common.Loading') : t('Common.Save')}
+                        </RadixButton>
+                    </div>
+                }
+            >
+                <form
+                    id="sales-create-customer"
+                    className="flex flex-col gap-4 p-1"
+                    onSubmit={async (e) => {
+                        e.preventDefault();
+                        const name = createName.trim();
+                        if (!name) {
+                            toast.error(t('Customer.CustomerName'));
+                            return;
+                        }
+                        setCreateLoading(true);
+                        try {
+                            const res = await CreateCustomerApi({
+                                name,
+                                phone_number: createPhone.replace(/\D/g, ''),
+                                country_code: '+91',
+                                country_iso_code: 'DK',
+                            });
+                            const data = (res as { data?: { data?: Record<string, unknown> } })?.data?.data;
+                            const id = data?.id as number | undefined;
+                            if (id == null) {
+                                toast.error(t('Customer.CustomerCreateError'));
+                                return;
+                            }
+                            const customer: GetApiCustomers200CustomersItem = {
+                                id,
+                                name: (data?.name as string) ?? name,
+                                phoneNumber: (data?.phone_number as string) ?? createPhone.replace(/\D/g, ''),
+                                outstandingAmount: (data?.outstanding_amount as number) ?? 0,
+                                giftCards: (data?.gift_cards as GetApiCustomers200CustomersItem['giftCards']) ?? [],
+                                countryCode: data?.country_code as GetApiCustomers200CustomersItem['countryCode'],
+                                countryISOCode:
+                                    data?.country_iso_code as GetApiCustomers200CustomersItem['countryISOCode'],
+                            };
+                            setSelectedCustomer(customer);
+                            setCart((prev: CartOverride) => ({
+                                ...prev,
+                                customerId: customer.id,
+                                customerName: customer.name,
+                                customer,
+                            }));
+                            setCreateCustomerModal(false);
+                            setCreateName('');
+                            setCreatePhone('');
+                            void refetch();
+                        } catch (err) {
+                            console.error(err);
+                            toast.error(t('Customer.CustomerCreateError'));
+                        } finally {
+                            setCreateLoading(false);
+                        }
                     }}
-                    open={createCustomerModal}
-                    closeForm={() => setCreateCustomerModal(false)}
-                    props={inputValue}
-                />
-            )}
+                >
+                    {inputValue ? (
+                        <p className="text-sm text-text-secondary dark:text-text-secondary">
+                            {t('Common.Search')}: {inputValue}
+                        </p>
+                    ) : null}
+                    <RadixInput
+                        label={t('Common.Name')}
+                        value={createName}
+                        onChange={(e) => setCreateName(e.target.value)}
+                        placeholder={t('Common.Name')}
+                        autoComplete="name"
+                    />
+                    <RadixInput
+                        label={t('Common.Phone')}
+                        value={createPhone}
+                        onChange={(e) => setCreatePhone(e.target.value.replace(/\D/g, ''))}
+                        placeholder="00 00 00 00"
+                        inputMode="tel"
+                    />
+                </form>
+            </RadixDialog>
         </Grid2>
     );
 });

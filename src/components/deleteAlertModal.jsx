@@ -1,10 +1,7 @@
 import React from 'react';
 import { Box, Modal, IconButton, Paper } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import CommonButton from './settings/commonButton';
-import SecondaryHeading from './settings/commonSecondaryHeading';
-import PrimaryHeading from './settings/commonPrimaryHeading';
-import { t } from 'i18next';
+import RadixButton from './radix/RadixButton';
 
 function CustomDeleteModal({
     open,
@@ -13,12 +10,8 @@ function CustomDeleteModal({
     title = '',
     onClickDismiss = () => {},
     onClickConfirm = () => {},
-    dismissColor = '#44B904',
-    dismissBg = 'transparent',
-    ConfirmColor = '#fff',
-    ConfirmBg = '#D30000',
-    confirmTitle = t('Common.Confirm'),
-    dismissTitle = t('Common.Dismiss'),
+    confirmTitle = 'Confirm',
+    dismissTitle = 'Dismiss',
     loading = false,
 }) {
     const closeModal = () => {
@@ -70,9 +63,9 @@ function CustomDeleteModal({
                         <CloseIcon />
                     </IconButton>
                 </Box>
-                <PrimaryHeading text={title ? title : t('Common.Delete')} />
+                <h5>{title ? title : 'Delete'}</h5>
                 <Box style={{ display: 'flex', width: '100%' }}>
-                    <SecondaryHeading fontColor="#6F6F6F" text={description} />
+                    <p>{description}</p>
                 </Box>
                 <Box
                     sx={{
@@ -84,25 +77,12 @@ function CustomDeleteModal({
                         gap: 2,
                     }}
                 >
-                    <CommonButton
-                        disabled={loading}
-                        width={{ xs: '100%', md: '150px' }}
-                        height="40px"
-                        minWidth="150px"
-                        backgroundColor={dismissBg}
-                        titleColor={dismissColor}
-                        onClick={onClickDismiss}
-                        title={dismissTitle}
-                    />
-                    <CommonButton
-                        disabled={loading}
-                        width={{ xs: '100%', md: '150px' }}
-                        height="40px"
-                        backgroundColor={ConfirmBg}
-                        titleColor={ConfirmColor}
-                        onClick={onClickConfirm}
-                        title={confirmTitle}
-                    />
+                    <RadixButton variant="outline" disabled={loading} onClick={onClickDismiss}>
+                        {dismissTitle}
+                    </RadixButton>
+                    <RadixButton variant="danger" disabled={loading} onClick={onClickConfirm}>
+                        {confirmTitle}
+                    </RadixButton>
                 </Box>
             </Paper>
         </Modal>

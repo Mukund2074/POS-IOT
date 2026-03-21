@@ -15,88 +15,13 @@ import moment from 'moment';
 import { PostCashDrawerClose } from '@/utils/Api/POS/CashDrawer';
 import { useSalesList } from '@/hooks/index';
 import { CashDrawerData, CashFormType } from './Types/cash-drawer.types';
-import { CashDrawerUtils } from './Core/cash-drawer.utils';
+import { CashDrawerUtils, generateTimeSlots } from './Core/cash-drawer.utils';
 import ListByPaymentType from './components/Modals/ListByPaymentType';
 import { useSelector } from 'react-redux';
 
 import VoteForNextDateModal from './components/Modals/VoteForNextDateModal';
-// @ts-ignore
-import { generateTimeSlots } from '@/components/calanderComponents/booking/utils/functions';
 import { api } from '@/utils/Api/POS';
 import Permission from '@/utils/POS/Permission';
-
-// const validationSchema = Yup.object().shape({
-//     outletId: Yup.number().required(),
-//     cashDrawerId: Yup.string().required(),
-//     fromDate: Yup.string().required(),
-//     toDate: Yup.string().required(),
-//     totalSales: Yup.number().min(0).required(),
-//     totalTenderAmount: Yup.number().min(0).required(),
-//     openingCash: Yup.number().min(0).required(),
-//     closingCash: Yup.number().min(0).required(),
-//     lastCashDrawerEndDate: Yup.string().nullable(),
-//     drawerName: Yup.string(),
-//     drawerStatus: Yup.string(),
-//     drawerStartDate: Yup.string(),
-//     drawerEndDate: Yup.string(),
-//     salesDetails: Yup.array().of(Yup.object()),
-//     paymentBreakdown: Yup.object().shape({
-//         cashAmount: Yup.number().min(0).required(),
-//         cardAmount: Yup.number().min(0).required(),
-//         mobilePayAmount: Yup.number().min(0).required(),
-//         bankTransferAmount: Yup.number().min(0).required(),
-//         giftCardAmount: Yup.number().min(0).required(),
-//         creditAmount: Yup.number().min(0).required(),
-//         otherAmount: Yup.number().min(0).required(),
-//         outlayAmount: Yup.number().min(0).required(),
-//         outstandingAmount: Yup.number().min(0).required(),
-//     }),
-//     salesBreakdown: Yup.object().shape({
-//         productSale: Yup.number().min(0).required(),
-//         serviceSale: Yup.number().min(0).required(),
-//         giftCardSale: Yup.number().min(0).required(),
-//         cutCardSale: Yup.number().min(0).required(),
-//         productSaleNonTaxable: Yup.number().min(0).required(),
-//         productSaleTaxable: Yup.number().min(0).required(),
-//         serviceSaleNonTaxable: Yup.number().min(0).required(),
-//         serviceSaleTaxable: Yup.number().min(0).required(),
-//     }),
-//     creditBreakdown: Yup.object().shape({
-//         cardCredit: Yup.number().min(0).required(),
-//         cashCredit: Yup.number().min(0).required(),
-//         bankTransferCredit: Yup.number().min(0).required(),
-//         mobilePayCredit: Yup.number().min(0).required(),
-//     }),
-//     bankTransformForm: Yup.array().of(
-//         Yup.object().shape({
-//             key: Yup.number().required(),
-//             label: Yup.string().required(),
-//             val: Yup.number().required(),
-//         }),
-//     ),
-//     CashDifferenceForm: Yup.array().of(
-//         Yup.object().shape({
-//             key: Yup.number().required(),
-//             label: Yup.string().required(),
-//             val: Yup.number().required(),
-//         }),
-//     ),
-//     transferToBank: Yup.number()
-//         .min(0, t('POS.TransferToBankMinError'))
-//         .test('max-transfer', t('POS.TransferToBankError'), function (value) {
-//             const { bankTransferTotal = 0 } = this.parent;
-//             if (value === undefined || value === null) return true; // allow empty, required will catch
-//             return value <= bankTransferTotal;
-//         })
-//         .required(t('POS.TransferToBankRequired')),
-//     addNoteToVoteCheck: Yup.boolean(),
-//     addNoteToVote: Yup.string(),
-//     cardDifference: Yup.number(),
-//     bankDifference: Yup.number(),
-//     bankTransferTotal: Yup.number(),
-//     remainingCashForNextDay: Yup.number(),
-//     selectedEmployee: Yup.number(),
-// });
 
 const CashDrawerLayout = () => {
     const { isAllowed } = Permission();

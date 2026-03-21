@@ -45,7 +45,7 @@ const Outstanding = () => {
              const formattedData: FormattedDataType[] = data.map((emp: GetApiInsightsCustomers200OneOfDataItem) => ({
                  customer: emp.name,
                  amount: formatCurrency(emp.outstandingAmount),
-                 number: `+45 ${emp.phoneNumber}`,
+                    number: `+91 ${emp.phoneNumber}`,
                  email: emp.email,
              }));
              setData(formattedData);

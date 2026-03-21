@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { t } from 'i18next';
 import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { cnMerge } from '../../utils/cnMerge';
-import { RadixButton, RadixSpinner } from '.';
+import RadixButton from './RadixButton';
 
 export interface ColumnType {
     id: string;

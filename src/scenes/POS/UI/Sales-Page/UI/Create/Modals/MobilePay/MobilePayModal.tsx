@@ -62,9 +62,9 @@ export default function MobilePayModal({
     const storeSettings = useSelector((state: any) => state?.settings?.data);
     const formik = useFormik({
         initialValues: {
-            countryCode: '+45',
+            countryCode: '+91',
             phoneNumber: '',
-            countryISOCode: 'DK',
+            countryISOCode: 'IN',
             amount: amount,
             description: '',
         },
@@ -111,7 +111,7 @@ export default function MobilePayModal({
     };
 
     useEffect(() => {
-        if (customer && customer.countryCode === '+45' && customer.countryISOCode === 'DK') {
+        if (customer && customer.countryCode === '+91' && customer.countryISOCode === 'IN') {
             formik.setFieldValue('countryCode', customer.countryCode);
             formik.setFieldValue('phoneNumber', customer.phoneNumber);
             formik.setFieldValue('countryISOCode', customer.countryISOCode);

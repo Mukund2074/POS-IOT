@@ -32,7 +32,7 @@ interface POSPhoneFieldProps extends Omit<TextFieldProps, 'onChange'> {
 }
 
 export default function POSPhoneField({
-    value = { country_code: '+45', phone: '', countryISOCode: 'DK' },
+    value = { country_code: '+91', phone: '', countryISOCode: 'IN' },
     onChange,
     onBlur,
     id,
@@ -52,7 +52,7 @@ export default function POSPhoneField({
     onCountryChange = () => {},
     ...props
 }: POSPhoneFieldProps) {
-    const [selectedCountry, setSelectedCountry] = useState<CountryListSchema>(CountryList['DK']);
+    const [selectedCountry, setSelectedCountry] = useState<CountryListSchema>(CountryList['IN']);
     const searchStringRef = useRef('');
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -90,7 +90,7 @@ export default function POSPhoneField({
         if (value?.country_code && CountryList[value?.countryISOCode as keyof typeof CountryList]) {
             setSelectedCountry(CountryList[value?.countryISOCode as keyof typeof CountryList]);
         } else {
-            setSelectedCountry(CountryList['DK']);
+            setSelectedCountry(CountryList['IN']);
         }
     }, [value?.country_code, value?.countryISOCode]);
 

@@ -45,7 +45,7 @@ const Receivables = () => {
               const formattedData: FormattedDataType[] = data?.map((emp: GetApiInsightsCustomers200OneOfDataItem) => ({
                   customer: emp.name,
                   receive: formatCurrency(emp.receivableAmount),
-                  number: `+45 ${emp.phoneNumber}`,
+                  number: `+91 ${emp.phoneNumber}`,
                   email: emp.email,
               }));
               setData(formattedData);

@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useCustomerItems } from '../../../../hooks/index';
 import { useParams } from 'react-router-dom';
-import { Stack } from '@mui/material';
-import FPrimaryHeading from '../../../commonComponents/F_PrimaryHeading';
+import { Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 import moment from 'moment';
-import FCommonTable from '../../../commonComponents/F_commonTable';
 import { formatCurrency } from '../../../../scenes/POS/Core/pos.utils';
+import RadixTable from '@/components/radix/RadixTable';
 
 export default function ProductSalesCustomer() {
     const params = useParams();
@@ -37,15 +36,28 @@ export default function ProductSalesCustomer() {
             receiptDate: moment(item?.receiptDate).format('DD/MM-YYYY HH:mm'),
         }));
 
+    const visible = ['name', 'subtotal', 'quantity', 'totalPrice', 'receiptDate'];
+
+    const radixColumns = useMemo(
+        () =>
+            columns
+                .filter((c) => visible.includes(c.id))
+                .map((c) => ({
+                    id: c.id,
+                    name: c.label,
+                    sortable: c.sortable,
+                    selector: (row) => row[c.id] ?? '',
+                })),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [t, isLoading],
+    );
+
     return (
         <Stack>
-            <FPrimaryHeading sx={{ mt: 4, mb: 2 }} text={t('Customer.ProductSales')} />
-            <FCommonTable
-                loading={isLoading}
-                columns={columns}
-                data={dataForTable || []}
-                visibleColumns={['name', 'subtotal', 'quantity', 'totalPrice', 'receiptDate']}
-            />
+            <Typography sx={{ mt: 4, mb: 2, color: '#545454', fontSize: '22px' }} variant="h6">
+                {t('Customer.ProductSales')}
+            </Typography>
+            <RadixTable loading={isLoading} columns={radixColumns} data={dataForTable || []} />
         </Stack>
     );
 }

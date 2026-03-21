@@ -1,11 +1,7 @@
-import { Grid2, InputAdornment, Stack, Tooltip, Typography, Button, AppBar, useMediaQuery } from '@mui/material';
+import { Box, CircularProgress, Grid2, Stack, Tooltip, Typography, Button, AppBar, useMediaQuery } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import FTextInput from '../../../commonComponents/F_TextInput';
-import FPrimaryHeading from '../../../commonComponents/F_PrimaryHeading';
-import FButton from '../../../commonComponents/F_Button';
-import FTextArea from '../../../commonComponents/F_TextArea';
 import LockIcon from '../../../../assets/lock.png';
 import moment from 'moment';
 import apiFetcher from '../../../../utils/interCeptor';
@@ -13,19 +9,22 @@ import { HttpStatusCode } from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import CustomDeleteModal from '../../../deleteAlertModal';
-import FSelect from '../../../commonComponents/F_Select';
 import { t } from 'i18next';
 import { useSelector } from 'react-redux';
 import Upload from '../../../../assets/uploadFile.svg';
 import { BlockCustomerApi, DeleteCustomerApi } from '../../../../utils/Api/Customer';
 import { useMode } from '../../../../theme';
-import FPhonePicker from '../../../commonComponents/F_PhonePicker';
 import { CountryList } from '../../../../data/CountryList';
 import { useCustomer } from '../../../../context/customer/CustomerContext';
 import CustomerCards from './CustomerCards';
 import AttachmentsList from './AttachmentsList';
 import { formatPrice } from '../../../../scenes/POS/Core/pos.utils';
-import FSwitch from '../../../commonComponents/f-switch';
+import RadixInput from '../../../radix/RadixInput';
+import RadixTextarea from '../../../radix/RadixTextarea';
+import RadixSelect from '../../../radix/RadixSelect';
+import RadixPhoneField from '../../../radix/RadixPhoneField';
+import RadixSwitch from '../../../radix/RadixSwitch';
+import RadixButton from '../../../radix/RadixButton';
 
 const dateObject = {
     dates: Array.from({ length: 31 }, (_, i) => i + 1),
@@ -207,10 +206,10 @@ const CustomerInformation = () => {
         birthday: customer?.birthday || null,
         cpr: customer?.cpr || '',
         attachments: customer?.attachments || [],
-        country_code: customer?.country_code ?? '+45',
-        country_code2: customer?.country_code2 ?? '+45',
-        country_iso_code: customer?.country_iso_code || 'DK',
-        country_iso_code2: customer?.country_iso_code2 || 'DK',
+        country_code: customer?.country_code ?? '+91',
+        country_code2: customer?.country_code2 ?? '+91',
+        country_iso_code: customer?.country_iso_code || 'IN',
+        country_iso_code2: customer?.country_iso_code2 || 'IN',
         isBlocked: customer?.block_booking,
         bonus: customer?.bonus || 0,
         marketing_permission: customer?.marketing_permission || false,
@@ -227,21 +226,21 @@ const CustomerInformation = () => {
                 email: values.email || '',
                 zip_code: values.zip_code || '',
                 city: values.city || '',
-                phone_number: values.phone_number?.startsWith('+45')
-                    ? values?.phone_number?.replace('+45', '')
+                phone_number: values.phone_number?.startsWith('+91')
+                    ? values?.phone_number?.replace('+91', '')
                     : values.phone_number || '',
                 marketplace_pointer: values.marketplace_pointer || '',
                 note: values.note || '',
-                phone_number2: values.phone_number2?.startsWith('+45')
-                    ? values?.phone_number2?.replace('+45', '')
+                phone_number2: values.phone_number2?.startsWith('+91')
+                    ? values?.phone_number2?.replace('+91', '')
                     : values.phone_number2 || '',
                 birthday: values.birthday || null,
                 cpr: values.cpr || '',
                 attachments: values?.attachments || [],
-                country_code: values?.country_code || '+45',
-                country_code2: values?.country_code2 || '+45',
-                country_iso_code: values?.country_iso_code || 'DK',
-                country_iso_code2: values?.country_iso_code2 || 'DK',
+                country_code: values?.country_code || '+91',
+                country_code2: values?.country_code2 || '+91',
+                country_iso_code: values?.country_iso_code || 'IN',
+                country_iso_code2: values?.country_iso_code2 || 'IN',
                 bonus: values?.bonus || 0,
                 marketing_permission: values?.marketing_permission || false,
             };
@@ -362,8 +361,8 @@ const CustomerInformation = () => {
     };
 
     useEffect(() => {
-        const phone1Len = CountryList[formik.values.country_iso_code || 'DK'];
-        const phone2Len = CountryList[formik.values.country_iso_code2 || 'DK'];
+        const phone1Len = CountryList[formik.values.country_iso_code || 'IN'];
+        const phone2Len = CountryList[formik.values.country_iso_code2 || 'IN'];
 
         let phone1MinLength, phone1MaxLength, phone2MinLength, phone2MaxLength;
 
@@ -557,26 +556,38 @@ const CustomerInformation = () => {
                 >
                     {isEdit
                         ? (user?.settings?.edit_customers || user?.role === 'ADMIN') && (
-                              <FButton
-                                  title={t('Customer.SaveCh')}
-                                  sx={{ borderRadius: 50, py: 1 }}
-                                  variant="save"
-                                  color="primary"
-                                  onClick={() => formik.handleSubmit()}
-                                  loading={saveLoading}
-                                  disabled={saveLoading}
-                              />
+                              <Box sx={{ borderRadius: 50, py: 1 }}>
+                                  <RadixButton
+                                      type="button"
+                                      variant="primary"
+                                      onClick={() => formik.handleSubmit()}
+                                      disabled={saveLoading}
+                                      className="rounded-full"
+                                  >
+                                      {saveLoading ? (
+                                          <CircularProgress size={20} sx={{ color: 'inherit' }} />
+                                      ) : (
+                                          t('Customer.SaveCh')
+                                      )}
+                                  </RadixButton>
+                              </Box>
                           )
                         : (user?.settings?.create_customers || user?.role === 'ADMIN') && (
-                              <FButton
-                                  title={t('Customer.AddCust')}
-                                  sx={{ borderRadius: 50, py: 1 }}
-                                  variant="save"
-                                  color="primary"
-                                  onClick={() => formik.handleSubmit()}
-                                  loading={saveLoading}
-                                  disabled={saveLoading}
-                              />
+                              <Box sx={{ borderRadius: 50, py: 1 }}>
+                                  <RadixButton
+                                      type="button"
+                                      variant="primary"
+                                      onClick={() => formik.handleSubmit()}
+                                      disabled={saveLoading}
+                                      className="rounded-full"
+                                  >
+                                      {saveLoading ? (
+                                          <CircularProgress size={20} sx={{ color: 'inherit' }} />
+                                      ) : (
+                                          t('Customer.AddCust')
+                                      )}
+                                  </RadixButton>
+                              </Box>
                           )}
                 </AppBar>
             )}
@@ -594,7 +605,9 @@ const CustomerInformation = () => {
                     zIndex: 1,
                 }}
             >
-                <FPrimaryHeading fontColor="#545454" fontSize="22px" text={t('Customer.CustomerInformation')} />
+                <Typography sx={{ color: '#545454', fontSize: '22px' }} variant="h6">
+                    {t('Customer.CustomerInformation')}
+                </Typography>
 
                 <form
                     style={{ width: '100%' }}
@@ -618,28 +631,23 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FTextInput
-                                            disabled={isEdit && !havePermission}
-                                            onBlur={formik.handleBlur}
-                                            mt={1}
-                                            name="name"
-                                            placeholder={t('Customer.CustomerName')}
-                                            value={formik.values.name}
-                                            onChange={formik.handleChange}
-                                            fontColor="#545454"
-                                            width={{ xs: '100%', md: '100%' }}
-                                            slotProps={
-                                                isBlocked && {
-                                                    input: {
-                                                        startAdornment: (
-                                                            <InputAdornment position="start">
-                                                                <Typography sx={{ color: '#1f1f1f' }}>🚫</Typography>
-                                                            </InputAdornment>
-                                                        ),
-                                                    },
+                                        <Box sx={{ mt: 1, width: '100%' }}>
+                                            <RadixInput
+                                                disabled={isEdit && !havePermission}
+                                                onBlur={formik.handleBlur}
+                                                name="name"
+                                                placeholder={t('Customer.CustomerName')}
+                                                value={formik.values.name}
+                                                onChange={formik.handleChange}
+                                                startComponent={
+                                                    isBlocked ? (
+                                                        <Typography sx={{ color: '#1f1f1f' }} component="span">
+                                                            🚫
+                                                        </Typography>
+                                                    ) : undefined
                                                 }
-                                            }
-                                        />
+                                            />
+                                        </Box>
                                         {formik.touched.name && formik.errors.name && (
                                             <Typography variant="caption" color="red">
                                                 {formik.errors.name}
@@ -663,17 +671,16 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FTextInput
-                                            disabled={isEdit && !havePermission}
-                                            onBlur={formik.handleBlur}
-                                            mt={1}
-                                            name="email"
-                                            placeholder={t('Common.Email')}
-                                            value={formik.values.email}
-                                            onChange={formik.handleChange}
-                                            fontColor="#545454"
-                                            width={{ xs: '100%', md: '100%' }}
-                                        />
+                                        <Box sx={{ mt: 1, width: '100%' }}>
+                                            <RadixInput
+                                                disabled={isEdit && !havePermission}
+                                                onBlur={formik.handleBlur}
+                                                name="email"
+                                                placeholder={t('Common.Email')}
+                                                value={formik.values.email}
+                                                onChange={formik.handleChange}
+                                            />
+                                        </Box>
                                         {formik.touched.email && formik.errors.email && (
                                             <Typography variant="caption" color="red">
                                                 {formik.errors.email}
@@ -697,17 +704,17 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FPhonePicker
+                                        <RadixPhoneField
                                             value={{
                                                 phone: formik.values.phone_number,
                                                 country_code: formik.values.country_code,
-                                                country_iso_code: formik.values.country_iso_code,
+                                                countryISOCode: formik.values.country_iso_code || 'IN',
                                             }}
                                             onBlur={() => formik.setFieldTouched('phone_number', true)}
-                                            onChange={(e) => formik.setFieldValue('phone_number', e)}
-                                            onCountryChange={(value) => {
-                                                formik.setFieldValue('country_code', value.country_code);
-                                                formik.setFieldValue('country_iso_code', value.country_iso_code);
+                                            onChange={(pv) => formik.setFieldValue('phone_number', pv.phone)}
+                                            onCountryChange={(code, iso) => {
+                                                formik.setFieldValue('country_code', code);
+                                                formik.setFieldValue('country_iso_code', iso);
                                             }}
                                             disabled={isEdit && !havePermission}
                                         />
@@ -734,17 +741,17 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FPhonePicker
+                                        <RadixPhoneField
                                             value={{
                                                 phone: formik.values.phone_number2,
                                                 country_code: formik.values.country_code2,
-                                                country_iso_code: formik.values.country_iso_code2,
+                                                countryISOCode: formik.values.country_iso_code2 || 'IN',
                                             }}
                                             onBlur={() => formik.setFieldTouched('phone_number2', true)}
-                                            onChange={(e) => formik.setFieldValue('phone_number2', e)}
-                                            onCountryChange={(value) => {
-                                                formik.setFieldValue('country_code2', value.country_code);
-                                                formik.setFieldValue('country_iso_code2', value.country_iso_code);
+                                            onChange={(pv) => formik.setFieldValue('phone_number2', pv.phone)}
+                                            onCountryChange={(code, iso) => {
+                                                formik.setFieldValue('country_code2', code);
+                                                formik.setFieldValue('country_iso_code2', iso);
                                             }}
                                             disabled={isEdit && !havePermission}
                                         />
@@ -772,41 +779,57 @@ const CustomerInformation = () => {
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
                                         <Stack width={'100%'} gap={2} alignItems={'center'} flexDirection={'row'}>
-                                            <FSelect
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                value={selectedDate.day}
-                                                placeholderText={'DD'}
-                                                sx={{ width: '30%' }}
-                                                onChange={(e) =>
-                                                    handleSelectDate({ date: e.target.value, type: 'day' })
-                                                }
-                                                options={mapOptions(dateObject.dates)}
-                                            />
+                                            <Box sx={{ width: '30%' }}>
+                                                <RadixSelect
+                                                    disabled={isEdit && !havePermission}
+                                                    value={selectedDate.day ? String(selectedDate.day) : undefined}
+                                                    placeholder="DD"
+                                                    onValueChange={(v) =>
+                                                        handleSelectDate({ date: Number(v), type: 'day' })
+                                                    }
+                                                    options={mapOptions(dateObject.dates).map((o) => ({
+                                                        label: String(o.label),
+                                                        value: String(o.value),
+                                                        disabled: o.disabled,
+                                                    }))}
+                                                />
+                                            </Box>
 
-                                            <FSelect
-                                                disabled={isEdit && !havePermission}
-                                                value={selectedDate.month}
-                                                placeholderText={'MM'}
-                                                sx={{ width: '30%' }}
-                                                onChange={(e) =>
-                                                    handleSelectDate({ date: e.target.value, type: 'month' })
-                                                }
-                                                // disabled={!selectedDate.day}
-                                                options={mapOptions(dateObject.months, getDisabledMonths())}
-                                            />
+                                            <Box sx={{ width: '30%' }}>
+                                                <RadixSelect
+                                                    disabled={isEdit && !havePermission}
+                                                    value={selectedDate.month ? String(selectedDate.month) : undefined}
+                                                    placeholder="MM"
+                                                    onValueChange={(v) =>
+                                                        handleSelectDate({ date: Number(v), type: 'month' })
+                                                    }
+                                                    options={mapOptions(dateObject.months, getDisabledMonths()).map(
+                                                        (o) => ({
+                                                            label: String(o.label),
+                                                            value: String(o.value),
+                                                            disabled: o.disabled,
+                                                        }),
+                                                    )}
+                                                />
+                                            </Box>
 
-                                            <FSelect
-                                                disabled={isEdit && !havePermission}
-                                                value={selectedDate.year}
-                                                sx={{ width: '40%' }}
-                                                placeholderText={'YYYY'}
-                                                onChange={(e) =>
-                                                    handleSelectDate({ date: e.target.value, type: 'year' })
-                                                }
-                                                // disabled={!selectedDate.month}
-                                                options={mapOptions(dateObject.years, getDisabledYears())}
-                                            />
+                                            <Box sx={{ width: '40%' }}>
+                                                <RadixSelect
+                                                    disabled={isEdit && !havePermission}
+                                                    value={selectedDate.year ? String(selectedDate.year) : undefined}
+                                                    placeholder="YYYY"
+                                                    onValueChange={(v) =>
+                                                        handleSelectDate({ date: Number(v), type: 'year' })
+                                                    }
+                                                    options={mapOptions(dateObject.years, getDisabledYears()).map(
+                                                        (o) => ({
+                                                            label: String(o.label),
+                                                            value: String(o.value),
+                                                            disabled: o.disabled,
+                                                        }),
+                                                    )}
+                                                />
+                                            </Box>
                                         </Stack>
 
                                         {formik.touched.birthday && formik.errors.birthday && (
@@ -841,24 +864,19 @@ const CustomerInformation = () => {
                                     </Tooltip>
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <FTextInput
-                                        disabled={isEdit && !havePermission}
-                                        size="small"
-                                        id={'cpr'}
-                                        name={'cpr'}
-                                        value={formik.values.cpr}
-                                        onChange={handleCprChange}
-                                        // onChange={(e => formik.setFieldValue('cpr', e.target.value))}
-                                        // onBlur={handleBlurCpr}
-                                        onBlur={formik.handleBlur}
-                                        placeholder="000000-XXXX"
-                                        inputProps={{ maxLength: 11 }}
-                                        sx={{
-                                            width: '100%',
-                                            '& input::placeholder': { color: '#747474', fontSize: '1rem', opacity: 1 },
-                                            fontSize: '1rem',
-                                        }}
-                                    />
+                                    <Box sx={{ width: '100%' }}>
+                                        <RadixInput
+                                            disabled={isEdit && !havePermission}
+                                            id="cpr"
+                                            name="cpr"
+                                            value={formik.values.cpr}
+                                            onChange={handleCprChange}
+                                            onBlur={formik.handleBlur}
+                                            placeholder="000000-XXXX"
+                                            maxLength={11}
+                                            className="text-base placeholder:text-[#747474]"
+                                        />
+                                    </Box>
                                 </Stack>
                                 <div style={{ zIndex: 50 }}>
                                     {formik.touched.cpr && formik.errors.cpr && (
@@ -875,20 +893,19 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FTextInput
-                                            disabled={isEdit && !havePermission}
-                                            onBlur={formik.handleBlur}
-                                            mt={1}
-                                            name="bonus"
-                                            placeholder={t('POS.Bonus')}
-                                            value={formik.values.bonus}
-                                            onChange={(e) => {
-                                                const input = formatPrice(e.target.value);
-                                                formik.setFieldValue('bonus', input);
-                                            }}
-                                            fontColor="#545454"
-                                            width={{ xs: '100%', md: '100%' }}
-                                        />
+                                        <Box sx={{ mt: 1, width: '100%' }}>
+                                            <RadixInput
+                                                disabled={isEdit && !havePermission}
+                                                onBlur={formik.handleBlur}
+                                                name="bonus"
+                                                placeholder={t('POS.Bonus')}
+                                                value={formik.values.bonus}
+                                                onChange={(e) => {
+                                                    const input = formatPrice(e.target.value);
+                                                    formik.setFieldValue('bonus', input);
+                                                }}
+                                            />
+                                        </Box>
                                         {formik.touched.bonus && formik.errors.bonus && (
                                             <Typography variant="caption" color="red">
                                                 {formik.errors.bonus}
@@ -914,17 +931,16 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FTextInput
-                                            disabled={isEdit && !havePermission}
-                                            onBlur={formik.handleBlur}
-                                            mt={1}
-                                            name="address"
-                                            placeholder={t('Common.Address')}
-                                            value={formik.values.address}
-                                            onChange={formik.handleChange}
-                                            fontColor="#545454"
-                                            width={{ xs: '100%', md: '100%' }}
-                                        />
+                                        <Box sx={{ mt: 1, width: '100%' }}>
+                                            <RadixInput
+                                                disabled={isEdit && !havePermission}
+                                                onBlur={formik.handleBlur}
+                                                name="address"
+                                                placeholder={t('Common.Address')}
+                                                value={formik.values.address}
+                                                onChange={formik.handleChange}
+                                            />
+                                        </Box>
                                         {formik.touched.address && formik.errors.address && (
                                             <Typography variant="caption" color="red">
                                                 {formik.errors.address}
@@ -953,17 +969,16 @@ const CustomerInformation = () => {
                                     </Typography>
                                     <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                         <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                            <FTextInput
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                mt={1}
-                                                name="zip_code"
-                                                placeholder={t('Common.ZipCode')}
-                                                value={formik.values.zip_code}
-                                                onChange={formik.handleChange}
-                                                fontColor="#545454"
-                                                width={{ xs: '100%', md: '100%' }}
-                                            />
+                                            <Box sx={{ mt: 1, width: '100%' }}>
+                                                <RadixInput
+                                                    disabled={isEdit && !havePermission}
+                                                    onBlur={formik.handleBlur}
+                                                    name="zip_code"
+                                                    placeholder={t('Common.ZipCode')}
+                                                    value={formik.values.zip_code}
+                                                    onChange={formik.handleChange}
+                                                />
+                                            </Box>
                                             {formik.touched.zip_code && formik.errors.zip_code && (
                                                 <Typography variant="caption" color="red">
                                                     {formik.errors.zip_code}
@@ -987,17 +1002,16 @@ const CustomerInformation = () => {
                                     </Typography>
                                     <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                         <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                            <FTextInput
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                mt={1}
-                                                name="city"
-                                                placeholder={t('Common.City')}
-                                                value={formik.values.city}
-                                                onChange={formik.handleChange}
-                                                fontColor="#545454"
-                                                width={{ xs: '100%', md: '100%' }}
-                                            />
+                                            <Box sx={{ mt: 1, width: '100%' }}>
+                                                <RadixInput
+                                                    disabled={isEdit && !havePermission}
+                                                    onBlur={formik.handleBlur}
+                                                    name="city"
+                                                    placeholder={t('Common.City')}
+                                                    value={formik.values.city}
+                                                    onChange={formik.handleChange}
+                                                />
+                                            </Box>
                                             {formik.touched.city && formik.errors.city && (
                                                 <Typography variant="caption" color="red">
                                                     {formik.errors.city}
@@ -1022,18 +1036,17 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FTextArea
-                                            disabled={isEdit && !havePermission}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.marketplace_pointer}
-                                            placeholder={t('Customer.CustomerNotes')}
-                                            onChange={formik.handleChange}
-                                            name="marketplace_pointer"
-                                            showCopyButton={false}
-                                            fontColor="#545454"
-                                            width={{ xs: '100%', md: '100%' }}
-                                            rows={5}
-                                        />
+                                        <Box sx={{ width: '100%' }}>
+                                            <RadixTextarea
+                                                disabled={isEdit && !havePermission}
+                                                onBlur={formik.handleBlur}
+                                                value={formik.values.marketplace_pointer}
+                                                placeholder={t('Customer.CustomerNotes')}
+                                                onChange={formik.handleChange}
+                                                name="marketplace_pointer"
+                                                rows={5}
+                                            />
+                                        </Box>
 
                                         {formik.touched.marketplace_pointer && formik.errors.marketplace_pointer && (
                                             <Typography variant="caption" color="red">
@@ -1058,18 +1071,17 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FTextArea
-                                            disabled={isEdit && !havePermission}
-                                            onBlur={formik.handleBlur}
-                                            value={formik.values.note}
-                                            placeholder="Note"
-                                            onChange={formik.handleChange}
-                                            name="note"
-                                            showCopyButton={false}
-                                            fontColor="#545454"
-                                            width={{ xs: '100%', md: '100%' }}
-                                            rows={5}
-                                        />
+                                        <Box sx={{ width: '100%' }}>
+                                            <RadixTextarea
+                                                disabled={isEdit && !havePermission}
+                                                onBlur={formik.handleBlur}
+                                                value={formik.values.note}
+                                                placeholder="Note"
+                                                onChange={formik.handleChange}
+                                                name="note"
+                                                rows={5}
+                                            />
+                                        </Box>
 
                                         {formik.touched.note && formik.errors.note && (
                                             <Typography variant="caption" color="red">
@@ -1086,9 +1098,9 @@ const CustomerInformation = () => {
                                 </Typography>
                                 <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
                                     <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <FSwitch
+                                        <RadixSwitch
                                             checked={formik.values.marketing_permission}
-                                            onChange={(event, checked) =>
+                                            onChange={(checked) =>
                                                 formik.setFieldValue('marketing_permission', checked)
                                             }
                                             name="marketing_permission"
@@ -1147,46 +1159,33 @@ const CustomerInformation = () => {
                     }}
                 >
                     {/* Delete Customer Button */}
-                    <FButton
-                        title={
+                    <Box sx={{ width: { xs: '100%', md: 180 }, py: 1 }}>
+                        <RadixButton
+                            type="button"
+                            variant="danger"
+                            onClick={() => setDeleteCustomerModel(true)}
+                            disabled={customer?.id === 'create'}
+                            className="rounded-full w-full"
+                        >
                             <Typography noWrap fontWeight={700}>
                                 {t('Customer.DelCust')}
                             </Typography>
-                        }
-                        sx={{
-                            borderRadius: 50,
-                            py: 1,
-                            width: { xs: '100%', md: 180 }, // Fixed width for consistency
-                        }}
-                        variant="delete"
-                        color="primary"
-                        onClick={() => setDeleteCustomerModel(true)}
-                        disabled={customer?.id === 'create'}
-                    />
+                        </RadixButton>
+                    </Box>
 
-                    {/* Block Customer Button */}
-                    <FButton
-                        title={
+                    <Box sx={{ width: { xs: '100%', md: 180 }, py: 1 }}>
+                        <RadixButton
+                            type="button"
+                            variant="primary"
+                            onClick={() => setBlockCustomerModal(true)}
+                            disabled={customer?.id === 'create'}
+                            className="rounded-full w-full !bg-[#e19957] !border-[#e19957] hover:!bg-[#c98445]"
+                        >
                             <Typography noWrap fontWeight={700}>
                                 {isBlocked ? t('Customer.UnblockCustomer') : t('Customer.BlockCustomer')}
                             </Typography>
-                        }
-                        sx={{
-                            borderRadius: 50,
-                            py: 1,
-                            width: { xs: '100%', md: 180 },
-                            backgroundColor: '#e19957',
-                            boxShadow: 'none',
-                            '&:hover': {
-                                boxShadow: 'none',
-                            },
-                        }}
-                        variant="contained"
-                        onClick={() => {
-                            setBlockCustomerModal(true);
-                        }} // Changed to different handler
-                        disabled={customer?.id === 'create'}
-                    />
+                        </RadixButton>
+                    </Box>
                 </Stack>
             )}
 

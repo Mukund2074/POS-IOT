@@ -53,14 +53,14 @@ const RadixInput: React.FC<RadixInputProps> = ({
             {label && <label className={labelClasses}>{label}</label>}
             <div className="relative">
                 {hasStartIcon && (
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                        {startIcon || startComponent}
+                    <div className="absolute left-3 top-1/2 z-[1] -translate-y-1/2 flex items-center pointer-events-none">
+                        <span className="pointer-events-auto">{startIcon || startComponent}</span>
                     </div>
                 )}
                 <input className={inputClasses} disabled={disabled} {...props} />
                 {hasEndIcon && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                        {endIcon || endComponent}
+                    <div className="absolute right-3 top-1/2 z-[1] -translate-y-1/2 flex items-center pointer-events-none">
+                        <span className="pointer-events-auto">{endIcon || endComponent}</span>
                     </div>
                 )}
             </div>

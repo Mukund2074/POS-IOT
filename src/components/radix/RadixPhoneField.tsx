@@ -6,6 +6,12 @@ import { CountryList, CountryListSchema } from '../../data/CountrylistTyped';
 import { formatMobileNumber } from '../../utils/POS/Functions';
 import { t } from 'i18next';
 
+function getCountryByIso(iso: string | undefined): CountryListSchema | undefined {
+    if (!iso) return undefined;
+    const key = iso.toUpperCase() as keyof typeof CountryList;
+    return CountryList[key];
+}
+
 export interface PhoneValue {
     country_code: string;
     phone: string;
@@ -29,7 +35,7 @@ export interface RadixPhoneFieldProps {
 }
 
 const RadixPhoneField: React.FC<RadixPhoneFieldProps> = ({
-    value = { country_code: '+45', phone: '', countryISOCode: 'DK' },
+    value = { country_code: '+91', phone: '', countryISOCode: 'IN' },
     onChange,
     onBlur,
     id,
@@ -43,7 +49,7 @@ const RadixPhoneField: React.FC<RadixPhoneFieldProps> = ({
     className,
     onCountryChange = () => {},
 }) => {
-    const [selectedCountry, setSelectedCountry] = useState<CountryListSchema>(CountryList['DK']);
+    const [selectedCountry, setSelectedCountry] = useState<CountryListSchema>(CountryList['IN']);
     const searchStringRef = useRef('');
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -78,12 +84,8 @@ const RadixPhoneField: React.FC<RadixPhoneFieldProps> = ({
     };
 
     useEffect(() => {
-        if (value?.country_code && CountryList[value?.countryISOCode as keyof typeof CountryList]) {
-            setSelectedCountry(CountryList[value?.countryISOCode as keyof typeof CountryList]);
-        } else {
-            setSelectedCountry(CountryList['DK']);
-        }
-    }, [value?.country_code, value?.countryISOCode]);
+        setSelectedCountry(getCountryByIso(value?.countryISOCode) ?? CountryList['IN']);
+    }, [value?.countryISOCode]);
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const onlyNumbers = e.target.value.replace(/\D/g, '');
@@ -96,7 +98,9 @@ const RadixPhoneField: React.FC<RadixPhoneFieldProps> = ({
     };
 
     const handleCountryChange = (countryISOCode: string) => {
-        const newCountry = CountryList[countryISOCode as keyof typeof CountryList];
+        if (!countryISOCode) return;
+        const newCountry = getCountryByIso(countryISOCode);
+        if (!newCountry) return;
         setSelectedCountry(newCountry);
         if (onChange) {
             onChange({
@@ -134,7 +138,7 @@ const RadixPhoneField: React.FC<RadixPhoneFieldProps> = ({
                 {/* Country Code Selector */}
                 <div className="absolute left-0 top-0 h-10 flex items-center z-10">
                     <Select.Root
-                        value={selectedCountry.id}
+                        value={selectedCountry?.id ?? 'IN'}
                         onValueChange={handleCountryChange}
                         disabled={disabledSelect || disabled}
                     >
@@ -147,10 +151,11 @@ const RadixPhoneField: React.FC<RadixPhoneFieldProps> = ({
                                 'disabled:opacity-50 disabled:cursor-not-allowed',
                                 'dark:bg-background-paper dark:text-text-primary',
                                 'dark:hover:bg-grey-800',
+                                'flex items-center justify-center',
                                 error && 'border-red-500 dark:border-red-500',
                             )}
                         >
-                            <Select.Value>{selectedCountry.code}</Select.Value>
+                            <Select.Value>{selectedCountry?.code ?? CountryList.IN.code}</Select.Value>
                             <Select.Icon className="ml-1">
                                 <KeyboardArrowDown
                                     className={cnMerge(
@@ -188,7 +193,7 @@ const RadixPhoneField: React.FC<RadixPhoneFieldProps> = ({
                                                     'focus:outline-none',
                                                     'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed',
                                                     'dark:text-text-primary dark:hover:bg-grey-800 dark:focus:bg-grey-800',
-                                                    selectedCountry.id === country.id &&
+                                                    selectedCountry?.id === country.id &&
                                                         'bg-primary-50 dark:bg-primary-900/20',
                                                 )}
                                             >

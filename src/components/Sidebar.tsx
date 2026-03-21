@@ -3,51 +3,38 @@ import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Link, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { RiArrowDownSLine, RiDoorOpenLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
-import packageJson from '../../package.json';
 import { Divider } from '@mui/material';
 
 // @ts-ignore
 import { route } from '../context/routeSlice';
-import '../scenes/global/sidebar.css';
 
 import { useQueryClient } from '@tanstack/react-query';
 
 // @ts-ignore
 import logo from '@/assets/fiind-orange-logo.png';
 import SidebarIcon from '@/assets/Marketing/SidebarIcon.svg';
-import CustomersIcon from '@/assets/Marketing/CustomersIcon.svg';
-import POSIcon from '@/assets/Marketing/POSIcon.svg';
-import PunchCardIcon from '@/assets/Marketing/PunchCardIcon.svg';
-import GiftCardIcon from '@/assets/Marketing/GiftCardIcon.svg';
-import SettingsIcon from '@/assets/Marketing/SettingsIcon.svg';
 
 import BahlouLogoFull from '@/assets/Bahlou_logo.png';
 import { cnMerge } from '@/utils/cnMerge';
-import { t } from 'i18next';
 import { useSelector } from 'react-redux';
 // @ts-ignore
 import { performCompleteLogout } from '@/utils/queryCacheUtils';
 // @ts-ignore
 import { PERMISSION_MAP } from '@/utils/permissionMap.ts';
-
-interface SubMenuItem {
-    key: string;
-    path: string;
-    icon?: string;
-    title?: string;
-    sequence: number;
-}
-
+import { FaUser, FaUserTie } from 'react-icons/fa';
+import { FaGear, FaStore } from 'react-icons/fa6';
+import { FaGift } from 'react-icons/fa6';
+import { FaHandPointer } from 'react-icons/fa6';
+import { PiSignOut } from 'react-icons/pi';
 interface SideBarTypes {
     id: number;
     key: string;
     path: string;
-    icon: string;
+    icon: string | React.ReactNode;
     title: string;
-    subMenu?: SubMenuItem[];
     sequence: number;
+    iconType: 'image' | 'component';
 }
 
 const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
@@ -66,7 +53,8 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
             id: 3,
             key: 'customers',
             path: '/customers',
-            icon: CustomersIcon,
+            icon: <FaUser className="h-4 w-4 flex-shrink-0" aria-hidden />,
+            iconType: 'component',
             title: 'Customers',
             sequence: 3,
         },
@@ -74,20 +62,46 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
             id: 4,
             key: 'employees',
             path: '/employees',
-            icon: CustomersIcon,
+            icon: <FaUserTie className="h-4 w-4 flex-shrink-0" aria-hidden />,
+            iconType: 'component',
             title: 'Employees',
             sequence: 4,
         },
-        { id: 9, key: 'pos', path: '/pos', icon: POSIcon, title: 'POS', sequence: 9 },
-        { id: 10, key: 'gift-card', path: '/gift-card', icon: GiftCardIcon, title: 'Gift card', sequence: 10 },
-        { id: 11, key: 'punch-card', path: '/punch-card', icon: PunchCardIcon, title: 'Punch card', sequence: 11 },
+        {
+            id: 9,
+            key: 'pos',
+            path: '/pos',
+            icon: <FaStore className="h-4 w-4 flex-shrink-0" aria-hidden />,
+            iconType: 'component',
+            title: 'POS',
+            sequence: 9,
+        },
+        {
+            id: 10,
+            key: 'gift-card',
+            path: '/gift-card',
+            icon: <FaGift className="h-4 w-4 flex-shrink-0" aria-hidden />,
+            iconType: 'component',
+            title: 'Gift card',
+            sequence: 10,
+        },
+        {
+            id: 11,
+            key: 'punch-card',
+            path: '/punch-card',
+            icon: <FaHandPointer className="h-4 w-4 flex-shrink-0" aria-hidden />,
+            iconType: 'component',
+            title: 'Punch card',
+            sequence: 11,
+        },
     ];
 
     const settingsItem: SideBarTypes = {
         id: 12,
         key: 'settings',
         path: '/settings',
-        icon: SettingsIcon,
+        icon: <FaGear className="h-4 w-4 flex-shrink-0" aria-hidden />,
+        iconType: 'component',
         title: 'Settings',
         sequence: 12,
     };
@@ -138,7 +152,11 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
                                         } ${isMobile ? 'justify-start' : isCollapse && 'justify-center'}`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <img src={item?.icon} alt="menu_icons" className="h-6 w-6" />
+                                            {item?.iconType === 'image' ? (
+                                                <img src={item?.icon as string} alt="menu_icons" className="h-6 w-6" />
+                                            ) : (
+                                                item?.icon
+                                            )}
                                             <span
                                                 className={`text-sm font-medium text-text-secondary mb-0 ${isMobile ? (isCollapse ? 'block' : 'hidden') : isCollapse ? 'hidden' : 'block'}`}
                                             >
@@ -166,7 +184,11 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
                                 location.pathname === settingsItem.path ? 'icon-active' : ''
                             } ${isMobile ? 'justify-start' : isCollapse && 'justify-center'}`}
                         >
-                            <img src={settingsItem.icon} alt="menu_icons" className="h-6 w-6" />
+                            {settingsItem.iconType === 'image' ? (
+                                <img src={settingsItem.icon as string} alt="menu_icons" className="h-6 w-6" />
+                            ) : (
+                                settingsItem.icon
+                            )}
                             <span
                                 className={`text-sm font-medium text-text-secondary mb-0 ${isMobile ? (isCollapse ? 'block' : 'hidden') : isCollapse ? 'hidden' : 'block'}`}
                             >
@@ -183,18 +205,16 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
                             isMobile ? 'justify-start' : isCollapse ? 'justify-center' : 'ml-2',
                         )}
                     >
-                        <RiDoorOpenLine className="h-6 w-6 flex-shrink-0" aria-hidden />
+                        <PiSignOut className="h-4 w-4 flex-shrink-0" aria-hidden />
                         <span
                             className={cnMerge(
                                 'text-sm font-medium text-text-secondary',
                                 isMobile ? (isCollapse ? 'block' : 'hidden') : isCollapse ? 'hidden' : 'block',
                             )}
                         >
-                            {t('Setting.Logout')}
+                            {'Logout'}
                         </span>
                     </button>
-                    <Divider />
-                    <p>Version {packageJson?.version}</p>
                 </div>
             </div>
         </div>

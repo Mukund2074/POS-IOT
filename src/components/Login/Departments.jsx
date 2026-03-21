@@ -1,81 +1,167 @@
-import { Avatar, Button, Stack, Typography } from '@mui/material'
-import { t } from 'i18next'
-import React from 'react'
-import tickImg from "../../assets/Vector (1).png";
+import { Avatar, Button, Stack, Typography, Box, Fade } from '@mui/material';
+import { t } from 'i18next';
+import React from 'react';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'; // Modern replacement for tickImg
+import theme from '../../ui/theme';
 
 export default function Departments({ locations, selectedLocation, handleSelectLocation, handleNext }) {
     return (
-        <Stack sx={{ maxHeight: { xs: "80%", md: '70%' }, bgcolor: '#FFFFFF', width: { xs: "100%", md: "50%" }, display: "flex", flexDirection: "column", py: 10, px: 2, borderRadius: 5, position: "relative", overflow: 'hidden' }} >
+        <Stack
+            sx={{
+                width: '100%',
+                maxWidth: '550px',
+                bgcolor: '#FFFFFF',
+                borderRadius: '40px',
+                position: 'relative',
+                overflow: 'hidden',
+                p: { xs: 3, md: 5 },
+                boxShadow: '0px 40px 80px -20px rgba(0, 0, 0, 0.1)',
+                border: `1px solid ${theme.colors.grey[100]}`,
+                maxHeight: '85vh',
+            }}
+        >
+            {/* BRANDING CONSISTENCY */}
+            <Stack direction="row" justifyContent="center" alignItems="baseline" sx={{ mb: 3 }}>
+                <Typography
+                    sx={{ fontSize: '3em', fontWeight: 900, color: theme.colors.grey[950], letterSpacing: '-1px' }}
+                >
+                    POS
+                </Typography>
+                <Typography sx={{ fontSize: '2em', fontWeight: 700, color: theme.colors.primary[500], ml: 0.5 }}>
+                    IoT
+                </Typography>
+            </Stack>
 
-
-            <Typography sx={{ textAlign: "center", color: '#6F6F6F', fontWeight: 400, fontSize: "27px", position: 'absolute', top: 0, left: 0, right: 0, p: 2 }} >
-                {t("Common.LogChooseDepartment")}
+            {/* TITLE */}
+            <Typography
+                sx={{
+                    textAlign: 'center',
+                    color: theme.colors.grey[900],
+                    fontSize: '27px',
+                    letterSpacing: '-1px',
+                    mb: 4,
+                }}
+            >
+                {t('Common.LogChooseDepartment')}
             </Typography>
 
-            <Stack sx={{ maxHeight: "100% ", width: "100%", bgcolor: '#FFFFFF', overflowY: "scroll", scrollbarWidth: 'thin', gap: 2, alignItems: "center" }} >
-                {locations.map((location, index) => (
-                    <Stack
-                        key={index}
-                        // className={`select-item ${selectedLocation === index ? "" : ""
-                        //     } ${location.is_active ? "" : "inactive"}`} // Add 'inactive' class if not active
-                        onClick={() =>
-                            handleSelectLocation(index)
-                        } // Only select if active
-                        sx={{
-                            // marginTop: "20px",
-                            // height: "18%",
-                            border: "3px solid #bbb0a4",
-                            width: { xs: '100%', md: '80%' },
-                            flexDirection: "row",
-                            alignItems: "center",
-                            p: 2, gap: 2,
-                            borderRadius: 3,
-                            bgcolor: !location.is_active && "#f0f0f0",
-                            opacity: !location.is_active && 0.5,
-                            // position: "relative",
-                            cursor: location.is_active ? "pointer" : "not-allowed",
-                        }} // Add 'not-allowed' cursor for inactive
-                    >
-                        {location.image && <Avatar src={location.image} />}
-                        <Stack flex={1} display={"table-column"} >
-                            <Typography variant="small" sx={{ fontSize: "1rem", color: "#545454", fontWeight: 700 }} >
-                                {location.name}
-                            </Typography>
-                            <Typography variant="h6" sx={{ fontSize: "0.85rem" }}>
-                                {location.email}
-                            </Typography>
-                        </Stack>
-                        {location.is_active && selectedLocation === index && (
-                            <img src={tickImg} alt="Selected" style={{ width: "20px", height: "17px", }} />
-                        )}
-                    </Stack>
-                ))}
-            </Stack>
+            {/* SELECTION LIST */}
             <Stack
                 sx={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    px: 1,
+                    gap: 2,
+                    pb: 10, // Space for the fixed button
+                    scrollbarWidth: 'none',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                }}
+            >
+                {locations.map((location, index) => {
+                    const isSelected = selectedLocation === index;
+                    const isActive = location.is_active;
+
+                    return (
+                        <Stack
+                            key={index}
+                            onClick={() => isActive && handleSelectLocation(index)}
+                            direction="row"
+                            alignItems="center"
+                            spacing={2}
+                            sx={{
+                                p: 2.5,
+                                borderRadius: '24px',
+                                cursor: isActive ? 'pointer' : 'not-allowed',
+                                border: '2px solid',
+                                borderColor: isSelected ? theme.colors.primary[500] : theme.colors.grey[100],
+                                bgcolor: isSelected
+                                    ? theme.colors.primary[50]
+                                    : isActive
+                                      ? '#FFFFFF'
+                                      : theme.colors.grey[50],
+                                opacity: isActive ? 1 : 0.6,
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                                boxShadow: isSelected ? `0px 10px 25px ${theme.colors.primary[100]}` : 'none',
+                                '&:hover': {
+                                    borderColor: isActive ? theme.colors.primary[300] : theme.colors.grey[100],
+                                    bgcolor: isActive && !isSelected ? theme.colors.grey[50] : undefined,
+                                },
+                            }}
+                        >
+                            <Avatar
+                                src={location.image}
+                                sx={{
+                                    width: 52,
+                                    height: 52,
+                                    border: `2px solid ${isSelected ? theme.colors.primary[200] : 'transparent'}`,
+                                }}
+                            />
+
+                            <Stack sx={{ flex: 1 }}>
+                                <Typography sx={{ fontSize: '1.1rem', color: theme.colors.grey[900], fontWeight: 700 }}>
+                                    {location.name}
+                                </Typography>
+                                <Typography
+                                    sx={{ fontSize: '0.85rem', color: theme.colors.grey[500], fontWeight: 500 }}
+                                >
+                                    {location.email}
+                                </Typography>
+                            </Stack>
+
+                            {isSelected && (
+                                <Fade in={isSelected}>
+                                    <CheckCircleRoundedIcon
+                                        sx={{ color: theme.colors.primary[500], fontSize: '28px' }}
+                                    />
+                                </Fade>
+                            )}
+                        </Stack>
+                    );
+                })}
+            </Stack>
+
+            {/* FIXED NEXT ACTION */}
+            <Box
+                sx={{
                     position: 'absolute',
-                    bottom: 0, left: 0, right: 0,
-                    p: 2, bgcolor: '#FFFFFF',
-                    display: "flex", justifyContent: "center", alignItems: "center",
-                    width: "100%"
-                }}>
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    p: 3,
+                    background: 'linear-gradient(to top, #FFFFFF 70%, rgba(255,255,255,0) 100%)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}
+            >
                 <Button
-                    sx={{
-                        py: 1,
-                        px: 4,
-                        color: '#fff',
-                        fontWeight: 500,
-                        bgcolor: selectedLocation === null ? "#ccc" : "#a2907c",
-                        borderRadius: 50,
-                        minWidth: "20%",
-                        width: { xs: '100%', md: "auto" },
-                    }}
+                    variant="contained"
                     disabled={selectedLocation === null}
                     onClick={handleNext}
+                    sx={{
+                        py: 2,
+                        px: 8,
+                        fontSize: '16px',
+                        fontWeight: 800,
+                        textTransform: 'none',
+                        borderRadius: '20px',
+                        bgcolor: theme.colors.grey[950],
+                        color: '#FFFFFF',
+                        width: { xs: '100%', md: 'auto' },
+                        minWidth: '200px',
+                        boxShadow: selectedLocation !== null ? '0px 15px 30px rgba(0,0,0,0.2)' : 'none',
+                        '&:hover': {
+                            bgcolor: theme.colors.grey[800],
+                        },
+                        '&.Mui-disabled': {
+                            bgcolor: theme.colors.grey[100],
+                            color: theme.colors.grey[400],
+                        },
+                    }}
                 >
-                    {t("Common.LogNext")}
+                    {t('Common.LogNext')}
                 </Button>
-            </Stack>
+            </Box>
         </Stack>
-    )
+    );
 }

@@ -59,7 +59,6 @@ import CustomerByPostal from './scenes/POS/UI/Report/UI/Customer/CustomerByPosta
 import NewCustomers from './scenes/POS/UI/Report/UI/Customer/NewCustomers';
 import Outstanding from './scenes/POS/UI/Report/UI/Customer/Outstanding';
 import Receivables from './scenes/POS/UI/Report/UI/Customer/Receivables';
-import HealthDeclationBookingList from './components/customer/customerDetail/HealthDeclarationBookingList/HealthDeclationBookingList';
 
 // GiftCard
 import GiftCardLayout from './scenes/GIftCard/GiftCard.layout';
@@ -122,10 +121,6 @@ export const router = createBrowserRouter([
                     {
                         path: 'punch-cards',
                         element: <ProtectedRoute element={<PunchCardsCustomer />} />,
-                    },
-                    {
-                        path: 'health-declaration-booking',
-                        element: <ProtectedRoute element={<HealthDeclationBookingList />} />,
                     },
                 ],
             },

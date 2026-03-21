@@ -13,8 +13,6 @@ import {
     Avatar,
 } from '@mui/material';
 
-import PrimaryHeading from '../commonPrimaryHeading';
-import SecondaryHeading from '../commonSecondaryHeading';
 import PencnlIconImg from '../../../assets/edit-2.png';
 import DeleteIconImg from '../../../assets/DeleteIcon.png';
 
@@ -24,37 +22,25 @@ import CustomDeleteModal from '../../deleteAlertModal';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
 
-import EmployeeModel from '../calendar/popup/EmployeeModel';
-import FSwitch from '../../commonComponents/f-switch';
-import { useSelector, useDispatch } from 'react-redux';
-import { settings as settingsSlice } from '../../../context/settingsSlice';
-import Notauthorized from '../../commonComponents/F_Notauthorized';
+import EmployeeModel from './EmployeeModel';
+import { useSelector } from 'react-redux';
+import Unauthorized from '../../../scenes/Unauthorized/Unauthorized';
 
-import { t } from 'i18next';
-import FSelect from '../../commonComponents/F_Select';
 import { CreateEmployeeApi, DeleteEmployeeApi } from '../../../utils/Api/Employee';
-import FPrimaryHeading from '../../commonComponents/F_PrimaryHeading';
-import { GetServiceGroup } from '../../../utils/Api/Service';
-import { useFieldArray, useForm } from 'react-hook-form';
-import { api } from '../../../utils/Api/POS';
-import FButton from '../../commonComponents/F_Button';
 import { getEmployeePermissionMapper, getEmployeePermissionsDefault } from './employee-permission-mapper';
 import { Masonry } from '@mui/lab';
 import { Link } from 'react-router-dom';
 import { InfoOutlined } from '@mui/icons-material';
-import { dividerSx } from '../../commonComponents/DividerSx';
+import RadixSwitch from '../../radix/RadixSwitch';
+import RadixSelect from '../../radix/RadixSelect';
+import RadixButton from '../../radix/RadixButton';
 
 const EmployeeSettingsOption = () => {
     const user = useSelector((state) => state.user.data);
     const settingsSelector = useSelector((state) => state.settings.data);
-    const dispatch = useDispatch();
-    const isInspectionEnabled = settingsSelector?.profile?.inspection_module;
-    const empOptions = settingsSelector?.employees?.map((emp) => {
-        return { value: emp?.id, label: `${emp?.name} ${emp?.role === 'DOCTOR' ? `(${emp?.role})` : ''}` };
-    });
 
-    const employeePermissionMapper = getEmployeePermissionMapper({ t });
-    const defaultPermissions = getEmployeePermissionsDefault({ t, value: false });
+    const employeePermissionMapper = getEmployeePermissionMapper();
+    const defaultPermissions = getEmployeePermissionsDefault({ value: false });
 
     const [showModal, setShowModal] = useState(false);
     const [editEmployee, setEditEmployee] = useState(null);
@@ -62,8 +48,6 @@ const EmployeeSettingsOption = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [enableSave, setEnableSave] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [serviceGroups, setServiceGroups] = useState([]);
-    const [assignSelectedEmployee] = useState(empOptions[0]?.value);
     const [initialValues, setInitialValues] = useState({
         id: null,
         name: '',
@@ -88,27 +72,6 @@ const EmployeeSettingsOption = () => {
         auto_sms_employee_before_hours:
             settingsSelector?.OnlineBooking?.inspection_module?.auto_sms_employee_before_hours || 'NO_SMS',
     });
-
-    const { control, watch, setValue } = useForm({
-        defaultValues: {
-            services: [],
-        },
-    });
-
-    const { append, remove, update } = useFieldArray({
-        control,
-        name: 'services',
-    });
-    const [initialServices, setInitialServices] = useState([]);
-    const servicesSelected = watch('services');
-    const normalize = (arr = []) =>
-        arr
-            .map((service) => ({
-                serviceId: service?.serviceId,
-                employeePrice: Number(service?.employeePrice),
-            }))
-            .sort((a, b) => a.serviceId - b.serviceId);
-    const serviceDirty = !_.isEqual(normalize(initialServices), normalize(servicesSelected));
 
     const getEmployees = async () => {
         try {
@@ -148,13 +111,7 @@ const EmployeeSettingsOption = () => {
                         }
                     });
 
-                    // Root cause fix:
-                    // The API may return a *partial* `settings` object (missing keys).
-                    // If we keep permissions partial, toggling/saving one "view_*" key can
-                    // make sibling keys appear/reset to false because they become `undefined`.
-                    // Always hydrate to the full known permission shape.
                     const permission = { ...defaultPermissions, ...(foundEmployee?.permission || {}) };
-                    // delete foundEmployee.settings;
 
                     const empData = {
                         ...foundEmployee,
@@ -188,12 +145,11 @@ const EmployeeSettingsOption = () => {
     const updatePermissionAPI = async (value) => {
         try {
             const { id, permission } = value;
-            // Always send the full known permission set (avoid wiping missing keys server-side).
             const payload = { ...defaultPermissions, ...(permission || {}) };
             const response = await apiFetcher.patch(`/api/v1/store/employee/setting/${id}`, payload);
             const { success } = response.data;
             if (success) {
-                toast.success(t('Setting.PermissionsUpdated'));
+                toast.success('Permissions updated');
 
                 setInitialValues(formik.values);
                 getEmployees();
@@ -203,43 +159,8 @@ const EmployeeSettingsOption = () => {
 
             formik.setSubmitting(false);
         } catch (err) {
-            toast.error(t('Setting.FailedToUpdatePermission'));
+            toast.error('Failed to update permission');
             console.error('err', err);
-            formik.setSubmitting(false);
-        }
-    };
-
-    const updateInspectionModuleAPI = async (values) => {
-        try {
-            const settingsPayload = {
-                ...settingsSelector?.OnlineBooking,
-                inspection_module: {
-                    ...settingsSelector?.OnlineBooking?.inspection_module,
-                    auto_sms_employee_before_hours:
-                        values?.auto_sms_employee_before_hours === 'NO_SMS'
-                            ? 0
-                            : values?.auto_sms_employee_before_hours,
-                },
-            };
-
-            const stringifiedSettingsPayload = JSON.stringify(settingsPayload);
-
-            await apiFetcher.patch('/api/v1/store/outlet/setting', {
-                settings: [
-                    {
-                        settingCategory: 'outlet',
-                        settingName: 'OnlineBooking',
-                        value: stringifiedSettingsPayload,
-                        type: 'JSON',
-                    },
-                ],
-            });
-            setEnableSave(false);
-            dispatch(settingsSlice({ ...settingsSelector, OnlineBooking: settingsPayload }));
-        } catch (err) {
-            toast.error(t('Setting.FailedToUpdatePermission'));
-            console.error('err', err);
-        } finally {
             formik.setSubmitting(false);
         }
     };
@@ -250,7 +171,6 @@ const EmployeeSettingsOption = () => {
             let payload = { ...values };
             delete payload.id;
             delete payload.image;
-            // delete payload.remove_image
 
             const formdata = new FormData();
 
@@ -268,16 +188,15 @@ const EmployeeSettingsOption = () => {
                     },
                 });
             } else {
-                // let url = "/api/v1/store/employee/";
                 await CreateEmployeeApi({ formdata });
             }
 
             formik.setSubmitting(false);
             getEmployees();
             setEditEmployee(null);
-            toast.success(values?.id ? t('Setting.EmployeeUpdated') : t('Setting.EmployeeCreated'));
+            toast.success(values?.id ? 'Employee updated' : 'Employee created');
         } catch (err) {
-            toast.error(values?.id ? t('Setting.FailedToUpdateEmployee') : t('Setting.FailedToCreateEmployee'));
+            toast.error(values?.id ? 'Failed to update employee' : 'Failed to create employee');
             console.error('err', err);
             setEditEmployee(null);
             formik.setSubmitting(false);
@@ -290,10 +209,10 @@ const EmployeeSettingsOption = () => {
             // let url = `/api/v1/store/employee/${values?.id}`;
             await DeleteEmployeeApi({ id: values?.id });
             getEmployees();
-            toast.success(t('Setting.EmployeeDeleted'));
+            toast.success('Employee deleted');
             setEditEmployee(null);
         } catch (err) {
-            toast.error(t('Setting.FailedToDeleteEmployee'));
+            toast.error('Failed to delete employee');
             setEditEmployee(null);
         }
     };
@@ -344,34 +263,11 @@ const EmployeeSettingsOption = () => {
                 allPermission,
             });
         }
-        // formik.setFieldValue()
-        // setSelectedEmployee(event.target.value);
     };
-
-    // const handleClose = () => {
-    //   setShowModal(false);
-    //   resetForm();
-    // };
-
-    // const resetForm = () => {
-    //   setEditEmployee(null);
-    //   // setEmployeeId(null);
-    //   // setName("");
-    //   // setPhone("");
-    //   // setAccessCode("");
-    //   // setJournalAccess(false);
-    //   // setRole("EMPLOYEE");
-    //   // setImage(null);
-    // };
-
-    // const handleSave = async () => {
-    //   handleClose();
-    // };
 
     useEffect(() => {
         setLoading(true);
         getEmployees();
-        fetchServices();
     }, []);
 
     const handleCloseDeleteModal = () => {
@@ -386,10 +282,6 @@ const EmployeeSettingsOption = () => {
             //   alert(JSON.stringify(values, null, 2));
             if (enableSave) {
                 await updatePermissionAPI(values);
-                await updateInspectionModuleAPI(values);
-            }
-            if (serviceDirty) {
-                await handleServiceAssign();
             }
         },
     });
@@ -397,7 +289,7 @@ const EmployeeSettingsOption = () => {
     const setAllPermission = (value) => {
         formik.setFieldValue('allPermission', value);
 
-        const newPermissions = getEmployeePermissionsDefault({ t, value });
+        const newPermissions = getEmployeePermissionsDefault({ value });
         formik.setFieldValue('permission', { ...newPermissions });
     };
 
@@ -457,81 +349,12 @@ const EmployeeSettingsOption = () => {
         setEnableSave(!_.isEqual(initialValuesData, formikValuesData));
     }, [formik.values]);
 
-    useEffect(() => {
-        if (!assignSelectedEmployee || !serviceGroups?.length) return;
-
-        const allServices = serviceGroups.flatMap((group) => group?.services || []);
-
-        const preAssignedServices = allServices
-            .filter((service) => service?.employees?.some((emp) => emp?.id === assignSelectedEmployee))
-            .map((service) => {
-                const emp = service?.employees.find((employee) => employee?.id === assignSelectedEmployee);
-
-                return {
-                    serviceId: service?.id,
-                    employeePrice: Number(emp?.price ?? service?.price),
-                };
-            });
-
-        setValue('services', preAssignedServices);
-
-        setInitialServices(_.cloneDeep(preAssignedServices));
-    }, [assignSelectedEmployee, serviceGroups]);
-
-    const fetchServices = async () => {
-        try {
-            setLoading(true);
-            const response = await GetServiceGroup();
-            setServiceGroups(response?.data?.data || []);
-        } catch (error) {
-            console.error('Error : ', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleToggleService = (service, checked) => {
-        const index = servicesSelected?.findIndex((ser) => ser?.serviceId === service?.id);
-
-        if (checked) {
-            const emp = service?.employees?.find((employee) => employee?.id === assignSelectedEmployee);
-
-            append({
-                serviceId: service?.id,
-                employeePrice: Number(emp?.price ?? service.price),
-            });
-        }
-
-        if (!checked) {
-            remove(index);
-        }
-    };
-
-    const handleServiceAssign = async () => {
-        try {
-            const response = await api.putApiServicesEmployeeAssignEmployeeId(assignSelectedEmployee, {
-                services: servicesSelected,
-            });
-            if (response || response?.success === true) {
-                setEnableSave(false);
-                setInitialServices(_.cloneDeep(servicesSelected));
-                toast.success(t('Setting.ServiceAssignSucc'));
-                await fetchServices();
-            }
-        } catch (error) {
-            console.error('Error : ', error);
-            toast.error(t('Common.ToastWrong'));
-        } finally {
-            setLoading(false);
-        }
-    };
-
     if (!user?.settings?.view_all_employees && user.role !== 'ADMIN') {
-        return <Notauthorized />;
+        return <Unauthorized />;
     }
     return (
         <form onSubmit={formik.handleSubmit}>
-            {(enableSave || serviceDirty) && (
+            {enableSave && (
                 <AppBar
                     sx={{
                         position: 'sticky',
@@ -543,30 +366,28 @@ const EmployeeSettingsOption = () => {
                         height: 50,
                         bgcolor: '#fff',
                         display: 'flex',
-                        // justifyContent: "flex-end",
                         alignItems: 'flex-end',
                         width: '100%',
                     }}
                 >
-                    <FButton
-                        onClick={formik.handleSubmit}
-                        width="auto"
-                        ml={'auto'}
-                        height={40}
-                        variant={'save'}
-                        title={
-                            formik.isSubmitting ? (
-                                <Stack sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-                                    <CircularProgress size={20} color="inharit" />
-                                    {t('POS.Processing')}
+                    <Box sx={{ ml: 'auto' }}>
+                        <RadixButton
+                            type="button"
+                            variant="primary"
+                            onClick={formik.handleSubmit}
+                            disabled={formik.isSubmitting}
+                            style={{ minHeight: 40 }}
+                        >
+                            {formik.isSubmitting ? (
+                                <Stack sx={{ display: 'flex', flexDirection: 'row', gap: 1, alignItems: 'center' }}>
+                                    <CircularProgress size={20} sx={{ color: 'inherit' }} />
+                                    Processing
                                 </Stack>
                             ) : (
-                                t('Setting.SaveChanges')
-                            )
-                        }
-                        disabled={formik.isSubmitting}
-                        sx={{ bgcolor: formik.isSubmitting && '#d2d2d2' }}
-                    />
+                                'Save Changes'
+                            )}
+                        </RadixButton>
+                    </Box>
                 </AppBar>
             )}
             <Stack p={{ xs: 2, md: 2 }}>
@@ -574,8 +395,8 @@ const EmployeeSettingsOption = () => {
                     {/* Employees */}
                     <Grid2 container spacing={3} sx={{ p: { xs: 2, md: 5 } }}>
                         <Grid2 size={{ xs: 12, md: 4 }}>
-                            <PrimaryHeading text={t('Common.Employees')} />
-                            <SecondaryHeading text={t('Setting.Description11')} />
+                            <h5 className="text-lg font-bold">Employees</h5>
+                            <p className="text-sm text-gray-500">Here you can add and edit employees.</p>
                         </Grid2>
 
                         <Grid2 size={{ xs: 12, md: 8 }}>
@@ -713,7 +534,7 @@ const EmployeeSettingsOption = () => {
                                                 }}
                                             >
                                                 <Typography sx={{ color: '#A0A0A0', fontWeight: 500 }}>
-                                                     {t('Setting.NewEmployee')}
+                                                    + New employee
                                                 </Typography>
                                             </Stack>
                                         </Grid2>
@@ -723,36 +544,41 @@ const EmployeeSettingsOption = () => {
                         </Grid2>
                     </Grid2>
 
-                    <Divider sx={{ ...dividerSx }} />
+                    <Divider sx={{ borderColor: '#EFEFEF', my: 2 }} />
 
                     {/* Permissions */}
                     {user?.role === 'ADMIN' && (
                         <Grid2 container spacing={3} sx={{ py: 2, px: { xs: 2, md: 5 } }}>
                             <Grid2 size={{ xs: 12, md: 4 }}>
-                                <PrimaryHeading text={t('Setting.Permissions')} />
-                                <SecondaryHeading text={t('Setting.Description12')} />
+                                <h5 className="text-lg font-bold">Permissions</h5>
+                                <p className="text-sm text-gray-500">
+                                    Here you can choose permissions for your employees.
+                                </p>
                             </Grid2>
 
                             <Grid2 container spacing={3} size={{ xs: 12, md: 8 }}>
                                 {/* Employee Select */}
                                 <Grid2 size={12}>
                                     <Typography variant="body1" sx={{ fontWeight: 700, color: '#1F1F1F' }}>
-                                        {t('Common.SelectEmployee')}
+                                        Select Employee
                                     </Typography>
-                                    <FSelect
-                                        value={formik?.values?.id || 0}
-                                        onChange={handleChangeSelectedEmployee}
-                                        options={employees}
-                                        sx={{
-                                            width: { xs: '100%', md: '30%' },
-                                            mt: 1,
-                                            '& .MuiTypography-root': {
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                            },
-                                        }}
-                                    />
+                                    <Box sx={{ width: { xs: '100%', md: '30%' }, mt: 1 }}>
+                                        <RadixSelect
+                                            value={
+                                                formik?.values?.id != null && formik.values.id !== ''
+                                                    ? String(formik.values.id)
+                                                    : undefined
+                                            }
+                                            onValueChange={(v) =>
+                                                handleChangeSelectedEmployee({ target: { value: v } })
+                                            }
+                                            options={employees.map((e) => ({
+                                                label: e.label,
+                                                value: String(e.value),
+                                            }))}
+                                            placeholder="Select Employee"
+                                        />
+                                    </Box>
                                 </Grid2>
 
                                 {/* All Permissions toggle */}
@@ -762,13 +588,13 @@ const EmployeeSettingsOption = () => {
                                             variant="subtitle1"
                                             sx={{ fontWeight: 700, color: '#1F1F1F', mb: 1.5 }}
                                         >
-                                            {t('Setting.AllPermissions')}
+                                            All Permissions
                                         </Typography>
-                                        <FSwitch
+                                        <RadixSwitch
                                             id="allPermission"
                                             checked={formik.values.allPermission}
-                                            onChange={(_, value) => setAllPermission(value)}
-                                            label={t('Setting.GrantAllPermissions')}
+                                            onChange={(value) => setAllPermission(value)}
+                                            label="Grant all permissions"
                                         />
                                     </Box>
                                 </Grid2>
@@ -797,13 +623,11 @@ const EmployeeSettingsOption = () => {
                                                         key={permission.id}
                                                         sx={{ display: 'flex', alignItems: 'center', mb: 1 }}
                                                     >
-                                                        <FSwitch
+                                                        <RadixSwitch
                                                             id={permission.id}
                                                             checked={formik.values.permission[permission.id]}
-                                                            onChange={(_, checked) =>
-                                                                onChangeValue(permission, checked)
-                                                            }
-                                                            label={t(permission.label)}
+                                                            onChange={(checked) => onChangeValue(permission, checked)}
+                                                            label={permission.label}
                                                         />
 
                                                         {permission.extraNote && (
@@ -814,7 +638,7 @@ const EmployeeSettingsOption = () => {
                                                     </Box>
                                                 ))}
                                                 {key === 'POS' && formik.values.permission['view_pos'] === true && (
-                                                    <Link to="/pos/settings">{t('Setting.DetailedPermissions')}</Link>
+                                                    <Link to="/pos/settings">Detailed Permissions</Link>
                                                 )}
                                             </Box>
                                         ))}
@@ -822,41 +646,6 @@ const EmployeeSettingsOption = () => {
                                 </Grid2>
                             </Grid2>
                         </Grid2>
-                    )}
-
-                    {isInspectionEnabled && (
-                        <React.Fragment>
-                            <Divider sx={{ ...dividerSx }} />
-
-                            <Grid2 container sx={{ p: { xs: 2, md: 5 } }}>
-                                <Grid2 size={{ xs: 12, md: 4 }}>
-                                    <PrimaryHeading text={t('Setting.AutoSmsEmployeeBeforeHours')} />
-                                    <SecondaryHeading text={t('Setting.AutoSmsEmployeeBeforeHoursDescription')} />
-                                </Grid2>
-                                <Grid2 size={{ xs: 12, md: 8 }} sx={{ px: 2 }}>
-                                    <FPrimaryHeading text={t('Setting.AutoSmsEmployeeBeforeHours')} fontSize={16} />
-                                    <FSelect
-                                        id={'auto_sms_employee_before_hours'}
-                                        value={formik.values?.auto_sms_employee_before_hours || 'NO_SMS'}
-                                        onChange={(e) =>
-                                            formik.setFieldValue('auto_sms_employee_before_hours', e.target.value)
-                                        }
-                                        options={[
-                                            {
-                                                value: 'NO_SMS',
-                                                label: t('Setting.NoSms'),
-                                            },
-                                            { value: 360, label: `6 ${t('Statistics.Hours')}` },
-                                            { value: 720, label: `12 ${t('Statistics.Hours')}` },
-                                            { value: 1440, label: `24 ${t('Statistics.Hours')}` },
-                                            { value: 2880, label: `48 ${t('Statistics.Hours')}` },
-                                        ]}
-                                        sx={{ width: { xs: '100%', md: '30%' }, mt: 1 }}
-                                        showPlaceHolder={false}
-                                    />
-                                </Grid2>
-                            </Grid2>
-                        </React.Fragment>
                     )}
 
                     {showModal && (
@@ -878,7 +667,7 @@ const EmployeeSettingsOption = () => {
                             handleClose={handleCloseDeleteModal}
                             description={
                                 <>
-                                    {t('Setting.AreYouSureYouWantToDelete')}
+                                    Are you sure you want to delete
                                     <span
                                         style={{
                                             marginLeft: 5,
@@ -887,7 +676,7 @@ const EmployeeSettingsOption = () => {
                                             marginRight: 5,
                                         }}
                                     >
-                                        {editEmployee?.name}
+                                        {editEmployee?.name}?
                                     </span>
                                     {/* {itemsToDelete?.type == 'container' ? 'service group': 'service'} */}
                                 </>

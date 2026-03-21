@@ -1,11 +1,11 @@
 import { ExtendedSaleItem } from '@/types/CartContext.type';
 
-export const CountryCodeGetter = ({ code = '+45' }: { code?: string }) => {
+export const CountryCodeGetter = ({ code = '+91' }: { code?: string }) => {
     const countryCode = code?.replace('+', '');
     if (code) {
         return Number(countryCode);
     } else {
-        return 45;
+        return 91;
     }
 };
 
@@ -32,44 +32,6 @@ export const calculateItemDiscount = (item: ExtendedSaleItem): number => {
 
     return 0;
 };
-
-// export const processedRegularItems = (item: ExtendedSaleItem, shouldRoundUp?: boolean) => {
-//     const subTotal = (item.price || 0) * (item.quantity || 1);
-//     const discountAmount = calculateItemDiscount(item);
-//     // Create discount object if discount exists
-//     const discounts = [];
-//     if (item.discountAmount && item.discountAmount > 0) {
-//         const discountObj = {
-//             discountId: null,
-//             couponId: null,
-//             discountName: `${item.discountType === 'VARIABLE_PERCENTAGE' ? 'Percentage' : 'Amount'} Discount`,
-//             discountAmount: discountAmount, // Calculated discount amount (e.g., 30)
-//             amountType: item.discountType || 'VARIABLE_PERCENTAGE',
-//             percentage: item.discountType === 'VARIABLE_PERCENTAGE' ? item.discountPercentage : 0,
-//             amount: item.discountType === 'VARIABLE_PERCENTAGE' ? discountAmount : item.discountAmount,
-//         };
-
-//         discounts.push(discountObj);
-//     } else {
-//         discounts.push({
-//             discountId: null,
-//             couponId: null,
-//             discountName: `${item.discountType === 'VARIABLE_PERCENTAGE' ? 'Percentage' : 'Amount'} Discount`,
-//             discountAmount: discountAmount, // Calculated discount amount (e.g., 30)
-//             amountType: item.discountType || 'VARIABLE_PERCENTAGE',
-//             percentage: item.discountType === 'VARIABLE_PERCENTAGE' ? item.discountPercentage : 0,
-//             amount: item.discountType === 'VARIABLE_PERCENTAGE' ? discountAmount : item.discountAmount,
-//         });
-//     }
-
-//     return {
-//         ...item,
-//         subTotal,
-//         discountAmount,
-//         amount: subTotal - discountAmount, // Simple calculation without tax
-//         discounts, // Include discount objects
-//     };
-// };
 
 export const processedRegularItems = (item: ExtendedSaleItem, shouldRoundUp?: boolean) => {
     const subTotal = (item.price || 0) * (item.quantity || 1);

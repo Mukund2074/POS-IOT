@@ -22,8 +22,8 @@ import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { HttpStatusCode } from 'axios';
 import { useData } from '../../context/DataContext';
-import FimageUpload from '../../components/commonComponents/F_imageUpload';
 import { toast } from 'sonner';
+import RadixButton from '../../components/radix/RadixButton';
 
 /* ─────────────────────────────────────────────────────────────
    DESIGN TOKENS  — mapped directly from your theme
@@ -770,23 +770,105 @@ const GeneralSettingsOption = () => {
                             <Grid2 container spacing={2.5} sx={{ mb: 3.5 }}>
                                 <Grid2 size={{ xs: 12, sm: 6 }}>
                                     <FieldLabel text="Profile Picture" />
-                                    <FimageUpload
-                                        formik={formik}
-                                        setter={(file) => formik.setFieldValue('profile_image', file)}
-                                        id="profile_image"
-                                        field={formik.values.profile_image}
-                                        handleFileRemove={() => handleFilesRemove({ profile_image: true })}
-                                    />
+                                    <Stack spacing={1}>
+                                        {(() => {
+                                            const field = formik.values.profile_image;
+                                            const previewSrc =
+                                                typeof field === 'string' && field
+                                                    ? field.startsWith('http')
+                                                        ? field
+                                                        : `${process.env.REACT_APP_IMG_URL || ''}${field}`
+                                                    : field && typeof field === 'object'
+                                                      ? URL.createObjectURL(field)
+                                                      : null;
+                                            return previewSrc ? (
+                                                <Box
+                                                    component="img"
+                                                    src={previewSrc}
+                                                    alt=""
+                                                    sx={{ maxHeight: 120, objectFit: 'contain', borderRadius: 1 }}
+                                                />
+                                            ) : null;
+                                        })()}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            hidden
+                                            id="profile_image"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) formik.setFieldValue('profile_image', file);
+                                                e.target.value = '';
+                                            }}
+                                        />
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <RadixButton
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => document.getElementById('profile_image')?.click()}
+                                            >
+                                                Upload
+                                            </RadixButton>
+                                            <RadixButton
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={() => handleFilesRemove({ profile_image: true })}
+                                            >
+                                                Remove
+                                            </RadixButton>
+                                        </Stack>
+                                    </Stack>
                                 </Grid2>
                                 <Grid2 size={{ xs: 12, sm: 6 }}>
                                     <FieldLabel text="Banner Picture" />
-                                    <FimageUpload
-                                        formik={formik}
-                                        setter={(file) => formik.setFieldValue('banner_image', file)}
-                                        id="banner_image"
-                                        field={formik.values.banner_image}
-                                        handleFileRemove={() => handleFilesRemove({ banner_image: true })}
-                                    />
+                                    <Stack spacing={1}>
+                                        {(() => {
+                                            const field = formik.values.banner_image;
+                                            const previewSrc =
+                                                typeof field === 'string' && field
+                                                    ? field.startsWith('http')
+                                                        ? field
+                                                        : `${process.env.REACT_APP_IMG_URL || ''}${field}`
+                                                    : field && typeof field === 'object'
+                                                      ? URL.createObjectURL(field)
+                                                      : null;
+                                            return previewSrc ? (
+                                                <Box
+                                                    component="img"
+                                                    src={previewSrc}
+                                                    alt=""
+                                                    sx={{ maxHeight: 120, objectFit: 'contain', borderRadius: 1 }}
+                                                />
+                                            ) : null;
+                                        })()}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            hidden
+                                            id="banner_image"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) formik.setFieldValue('banner_image', file);
+                                                e.target.value = '';
+                                            }}
+                                        />
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <RadixButton
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => document.getElementById('banner_image')?.click()}
+                                            >
+                                                Upload
+                                            </RadixButton>
+                                            <RadixButton
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={() => handleFilesRemove({ banner_image: true })}
+                                            >
+                                                Remove
+                                            </RadixButton>
+                                        </Stack>
+                                    </Stack>
                                 </Grid2>
                             </Grid2>
                         )}

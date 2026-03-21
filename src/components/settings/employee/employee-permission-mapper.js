@@ -1,22 +1,22 @@
-export const getEmployeePermissionMapper = ({ t = () => {} }) => {
+export const getEmployeePermissionMapper = () => {
     return {
         settingOptions: {
-            label: t('Setting.ChangePermissions'),
+            label: 'Change Permissions',
             permissions: [
-                { label: t('Setting.ChangePermissions'), id: 'change_permissions' },
-                { label: t('Setting.CreateEmployees'), id: 'create_employee' },
-                { label: t('Setting.CreateCustomers'), id: 'create_customers' },
-                { label: t('Setting.EditCustomers'), id: 'edit_customers' },
-                { label: t('Setting.DeleteCustomers'), id: 'delete_customers' },
-                { label: t('Setting.ViewCustomers'), id: 'view_customers' },
-                { label: t('Setting.ViewPOS'), id: 'view_pos', extraNote: t('Setting.POSExtraNote') },
+                { label: 'Change Permissions', id: 'change_permissions' },
+                { label: 'Create Employees', id: 'create_employee' },
+                { label: 'Create Customers', id: 'create_customers' },
+                { label: 'Edit Customers', id: 'edit_customers' },
+                { label: 'Delete Customers', id: 'delete_customers' },
+                { label: 'View Customers', id: 'view_customers' },
+                { label: 'ViewPOS', id: 'view_pos', extraNote: 'POSExtraNote' },
             ],
         },
     };
 };
 
-export const getEmployeePermissionsDefault = ({ t = () => {}, value = false }) => {
-    const mapper = getEmployeePermissionMapper({ t });
+export const getEmployeePermissionsDefault = ({ value = false }) => {
+    const mapper = getEmployeePermissionMapper();
 
     return Object.values(mapper).reduce((acc, { permissions = [] }) => {
         permissions.forEach((permission) => {

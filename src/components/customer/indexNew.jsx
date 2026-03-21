@@ -1,17 +1,15 @@
-import { CircularProgress, Stack, useMediaQuery } from '@mui/material';
+import { Box, CircularProgress, Stack, Typography, useMediaQuery } from '@mui/material';
 import React, { useState, useEffect, useCallback } from 'react';
 import { t } from 'i18next';
-import FSelect from '../commonComponents/F_Select';
-import FButton from '../commonComponents/F_Button';
-import FPrimaryHeading from '../commonComponents/F_PrimaryHeading';
 import { useNavigate } from 'react-router-dom';
-import FCommonTable from '../commonComponents/F_commonTable';
 import axios, { HttpStatusCode } from 'axios';
-import FTextInput from '../commonComponents/F_TextInput';
+import RadixInput from '../radix/RadixInput';
+import RadixMultiSelect from '../radix/RadixMultiSelect';
+import RadixButton from '../radix/RadixButton';
+import RadixTable from '../radix/RadixTable';
 import { debounce } from 'lodash';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import { useTheme } from '@emotion/react';
 import apiFetcher2 from '../../utils/Api/POS/Interceptor2';
 
@@ -35,11 +33,11 @@ const CustomerListNew = () => {
     const [loading, setLoading] = useState({
         page: false,
         table: false,
-        more: false,
+        export: false,
     });
-    const [hasMore, setHasMore] = useState(true);
-    const [offset, setOffset] = useState(0);
-    const PAGE_SIZE = 50;
+    const [totalCount, setTotalCount] = useState(0);
+    const [page, setPage] = useState(0);
+    const PAGE_SIZE = 20;
     const [order, setOrder] = useState('asc');
     const [sortBy, setSortBy] = useState('name');
 
@@ -62,7 +60,7 @@ const CustomerListNew = () => {
         lastBooking: 'last_booking_date',
         Bookings: 'total_bookings',
     };
-    const fetchSuggestions = debounce(async ({ cus, emp, lim, off, reset = false, ord, srb, load = false }) => {
+    const fetchCustomerList = async ({ cus, emp, lim, off, ord, srb, load = false }) => {
         if (cus.trim() || emp === '' || emp) {
             if (cancelToken) {
                 cancelToken.cancel('Canceling previous request');
@@ -88,20 +86,8 @@ const CustomerListNew = () => {
                     if (response.status === HttpStatusCode.Ok) {
                         const newCustomers = response?.data?.data?.data || [];
                         const totalItems = response?.data?.data?.total || 0;
-                        const currentCount = reset
-                            ? newCustomers.length
-                            : apiData.customers.length + newCustomers.length;
-
-                        setHasMore(currentCount < totalItems);
-
-                        if (reset) {
-                            setApiData((prev) => ({ ...prev, customers: newCustomers }));
-                        } else {
-                            setApiData((prev) => ({
-                                ...prev,
-                                customers: [...prev.customers, ...newCustomers],
-                            }));
-                        }
+                        setTotalCount(totalItems);
+                        setApiData((prev) => ({ ...prev, customers: newCustomers }));
                     }
                 })
                 .catch((thrown) => {
@@ -115,27 +101,25 @@ const CustomerListNew = () => {
                     setLoading((prev) => ({
                         ...prev,
                         table: false,
-                        more: false,
                     }));
                 });
         }
-    }, 500);
+    };
 
-    const fetchNextPage = () => {
-        setLoading((prev) => ({
-            ...prev,
-            more: true,
-        }));
-        const nextPage = offset + PAGE_SIZE;
-        setOffset(nextPage);
-        fetchSuggestions({
+    const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+    const canGoPrev = page > 0;
+    const canGoNext = totalCount > 0 && (page + 1) * PAGE_SIZE < totalCount;
+
+    const goToPage = (nextPage) => {
+        setPage(nextPage);
+        fetchCustomerList({
             cus: searchTerm,
             emp: selectedEmployee.length === employeeObjForSelect.length ? '' : selectedEmployee,
             lim: PAGE_SIZE,
-            off: nextPage,
-            reset: false,
+            off: nextPage * PAGE_SIZE,
             ord: order,
             srb: keyObj[sortBy],
+            load: true,
         });
     };
 
@@ -146,13 +130,11 @@ const CustomerListNew = () => {
     }, [setting]);
 
     useEffect(() => {
-        fetchSuggestions({
+        fetchCustomerList({
             cus: '',
             emp: selectedEmployee.length === employeeObjForSelect.length ? '' : selectedEmployee,
-            // pageNum: 1,
             lim: PAGE_SIZE,
             off: 0,
-            reset: true,
             ord: order,
             srb: keyObj[sortBy],
             load: true,
@@ -184,19 +166,18 @@ const CustomerListNew = () => {
     // Create a debounced search handler
     const debouncedSearch = useCallback(
         debounce((searchValue, employeeSelection) => {
-            setOffset(0);
-            fetchSuggestions({
+            setPage(0);
+            fetchCustomerList({
                 cus: searchValue,
                 emp: employeeSelection.length === employeeObjForSelect.length ? '' : employeeSelection,
                 lim: PAGE_SIZE,
                 off: 0,
-                reset: true,
                 ord: order,
                 srb: keyObj[sortBy],
                 load: true,
             });
         }, 500),
-        [employeeObjForSelect],
+        [employeeObjForSelect, order, sortBy],
     );
 
     const handleSearchChange = (e) => {
@@ -226,30 +207,54 @@ const CustomerListNew = () => {
     };
 
     const formatPhoneNumber = (number) => {
-        if (number != '') {
+        if (number !== '') {
             return number?.replace(/(\d{2})(?=\d)/g, '$1 ');
-        } else {
-            return '';
         }
+        return '';
     };
 
     const handleSort = (column) => {
         const newOrder = order === 'asc' ? 'desc' : 'asc';
         setOrder(newOrder);
         setSortBy(column);
-        setOffset(0);
+        setPage(0);
 
-        fetchSuggestions({
+        fetchCustomerList({
             cus: searchTerm,
             emp: selectedEmployee.length === employeeObjForSelect.length ? '' : selectedEmployee,
             lim: PAGE_SIZE,
             off: 0,
-            reset: true,
             ord: newOrder,
             srb: keyObj[column],
             load: true,
         });
     };
+
+    const visibleColumnIds = isMobile
+        ? ['name', 'phone', 'GoTo']
+        : ['name', 'phone', 'email', 'lastBooking', 'Bookings', 'AssignedTo', 'GoTo'];
+
+    const columnWidthsMap = isMobile
+        ? { name: '50%', phone: '50%', GoTo: '0%' }
+        : {
+              name: '15%',
+              phone: '15%',
+              email: '20%',
+              lastBooking: '20%',
+              Bookings: '10%',
+              AssignedTo: '15%',
+              GoTo: '5%',
+          };
+
+    const radixTableColumns = columns
+        .filter((c) => visibleColumnIds.includes(c.id))
+        .map((c) => ({
+            id: c.id,
+            name: c.label,
+            sortable: c.sortable,
+            width: columnWidthsMap[c.id],
+            selector: (row) => row[c.id] ?? '',
+        }));
 
     useEffect(() => {
         const data = apiData.customers.map((data) => ({
@@ -257,7 +262,7 @@ const CustomerListNew = () => {
             name: `${data.block_booking ? '🚫 ' : ''}${data.name}`,
             phone:
                 data.phone_number.length > 0
-                    ? `${data?.country_code ?? '+45'} ${formatPhoneNumber(data.phone_number)}`
+                    ? `${data?.country_code ?? '+91'} ${formatPhoneNumber(data.phone_number)}`
                     : '',
             email: data.email,
             lastBooking: data.last_booking_date
@@ -290,136 +295,149 @@ const CustomerListNew = () => {
         );
     return (
         <Stack pb={4}>
+            <div className="flex flex-col gap-2 py-2 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">
+                <Typography
+                    sx={{ color: '#545454', fontSize: '22px' }}
+                    variant="h6"
+                    className="w-full shrink-0 lg:w-auto"
+                >
+                    {t('Common.Customers')}
+                </Typography>
+
+                {/* Mobile: 1 column; md–lg: 2×2 grid; lg+: single row with controls inline */}
+                <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2 lg:contents">
+                    <Box className="w-full min-w-0 px-0 md:px-1 lg:ml-auto lg:w-auto lg:min-w-[200px] lg:max-w-[min(320px,100%)]">
+                        <RadixInput
+                            placeholder={`${t('Common.Search')}...`}
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            className="w-full rounded-full"
+                        />
+                    </Box>
+
+                    <RadixMultiSelect
+                        options={employeeObjForSelect.map((o) => ({
+                            label: o.label,
+                            value: String(o.value),
+                        }))}
+                        selectedValues={new Set(selectedEmployee.map(String))}
+                        onSelectionChange={(set) => {
+                            const picked = Array.from(set).map(Number);
+                            const allID = employeeObjForSelect?.map((data) => data.value) ?? [];
+                            let next =
+                                picked.length === 0
+                                    ? []
+                                    : picked.length === allID.length && allID.length > 0
+                                      ? allID
+                                      : picked;
+                            setSelectedEmployee(next);
+                            setPage(0);
+                            fetchCustomerList({
+                                cus: searchTerm,
+                                emp: next.length === allID.length ? '' : next,
+                                lim: PAGE_SIZE,
+                                off: 0,
+                                ord: order,
+                                srb: keyObj[sortBy],
+                                load: true,
+                            });
+                        }}
+                        placeholder={t('Common.AllEmployees')}
+                        selectAllLabel={t('Common.AllEmployees')}
+                        textToDisplayWithCount={t('Common.Employees')}
+                        showSelectAll
+                        className="w-full min-w-0 md:w-full lg:w-fit"
+                    />
+
+                    {user?.settings?.create_customers && (
+                        <RadixButton
+                            type="button"
+                            variant="primary"
+                            onClick={handleCreateCustomer}
+                            className="w-full min-w-0 md:w-full lg:w-fit"
+                        >
+                            {`+ ${t('Customer.AddNewCustomer')}`}
+                        </RadixButton>
+                    )}
+
+                    <RadixButton
+                        type="button"
+                        variant="primary"
+                        disabled={loading?.export}
+                        onClick={async () => {
+                            setLoading((prev) => ({ ...prev, export: true }));
+                            try {
+                                const response = await apiFetcher2.get('/api/customers/export', {
+                                    responseType: 'blob',
+                                });
+                                const link = document.createElement('a');
+                                const url = (link.href = window.URL.createObjectURL(
+                                    new Blob([response.data], { type: 'text/csv;charset=utf-8;' }),
+                                ));
+                                link.setAttribute('download', 'customers.csv');
+                                link.click();
+                                window.URL.revokeObjectURL(url);
+                            } catch (error) {
+                                console.error('Export API error:', error);
+                            } finally {
+                                setLoading((prev) => ({ ...prev, export: false }));
+                            }
+                        }}
+                        className="w-full min-w-0 md:w-full lg:w-fit !bg-[#44b904] !text-white border-none hover:!bg-[#3da003]"
+                    >
+                        {loading?.export ? '…' : t('Setting.Export')}
+                    </RadixButton>
+                </div>
+            </div>
+
+            <RadixTable
+                loading={loading?.table}
+                columns={radixTableColumns}
+                data={dataForColumn}
+                onRowClick={handleRowClick}
+                defaultOrder="name"
+                isServerSorting
+                onSort={handleSort}
+                serverSortOrder={order}
+            />
+
             <Stack
-                display={'flex'}
-                flexDirection={{ xs: 'wrap', md: 'row' }}
-                alignItems={{ xs: 'flex-start', md: 'center' }}
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                flexWrap="wrap"
                 gap={2}
                 py={2}
+                px={0.5}
             >
-                <FPrimaryHeading text={t('Common.Customers')} />
-                <FTextInput
-                    backgroundColor="#fff"
-                    borderRadius={50}
-                    mt={0}
-                    sx={{ ml: { xs: 0, md: 'auto' }, width: { xs: '100%', md: '20%' }, px: 1 }}
-                    placeholder={`${t('Common.Search')}...`}
-                    onChange={handleSearchChange}
-                    value={searchTerm}
-                />
-
-                <FSelect
-                    selectAllRenderText={t('Common.AllEmployees')}
-                    backgroundColor="#fff"
-                    isMultiSelect={true}
-                    value={selectedEmployee}
-                    TextToDisplayWithCount={`${t('Common.Employees')}`}
-                    sx={{ width: { xs: '100%', md: '20%' } }}
-                    onChange={handleSelectEmployee}
-                    placeholderText={t('Common.AllEmployees')}
-                    selectAllRenderCheckBoxText={t('Common.AllEmployees')}
-                    options={employeeObjForSelect}
-                    borderRadius={50}
-                    padding={0}
-                    onClose={() => {
-                        // setPage(1);
-                        setOffset(0);
-                        fetchSuggestions({
-                            cus: searchTerm,
-                            emp: selectedEmployee.length === employeeObjForSelect.length ? '' : selectedEmployee,
-                            lim: PAGE_SIZE,
-                            off: 0,
-                            reset: true,
-                            ord: order,
-                            srb: keyObj[sortBy],
-                            load: true,
-                        });
-                    }}
-                />
-
-                {user?.settings?.create_customers && (
-                    <FButton
-                        height={40}
-                        variant={'save'}
-                        title={`+ ${t('Customer.AddNewCustomer')}`}
-                        onClick={handleCreateCustomer}
-                        sx={{ borderRadius: 50, py: 1, width: { xs: '100%', md: '30%', lg: '20%' } }}
-                    />
-                )}
-
-                <FButton
-                    title={t('Setting.Export')}
-                    sx={{
-                        borderRadius: 50,
-                        color: '#fff',
-                        background: '#44b904',
-                        py: 1,
-                        width: { xs: '100%', md: '30%', lg: '10%' },
-                    }}
-                    loading={loading?.more}
-                    onClick={async () => {
-                        setLoading((prev) => ({ ...prev, more: true }));
-                        try {
-                            const response = await apiFetcher2.get('/api/customers/export', {
-                                responseType: 'blob',
-                            });
-                            const link = document.createElement('a');
-                            const url = (link.href = window.URL.createObjectURL(
-                                new Blob([response.data], { type: 'text/csv;charset=utf-8;' }),
-                            ));
-                            link.setAttribute('download', 'customers.csv');
-                            link.click();
-                            window.URL.revokeObjectURL(url);
-                        } catch (error) {
-                            console.error('Export API error:', error);
-                        } finally {
-                            setLoading((prev) => ({ ...prev, more: false }));
-                        }
-                    }}
-                />
+                <Typography sx={{ color: '#666', fontSize: 14 }}>
+                    {totalCount === 0
+                        ? '—'
+                        : `${t('Common.Page')} ${page + 1} ${t('Common.of')} ${totalPages} · ${totalCount}`}
+                </Typography>
+                <Stack direction="row" alignItems="center" gap={1}>
+                    <RadixButton
+                        type="button"
+                        iconOnly
+                        variant="secondary"
+                        disabled={!canGoPrev || loading?.table}
+                        onClick={() => goToPage(page - 1)}
+                        aria-label={t('Common.Before')}
+                    >
+                        ←
+                    </RadixButton>
+                    <RadixButton
+                        type="button"
+                        variant="secondary"
+                        iconOnly
+                        disabled={!canGoNext || loading?.table}
+                        onClick={() => goToPage(page + 1)}
+                        aria-label={t('Common.Next')}
+                    >
+                        →
+                    </RadixButton>
+                </Stack>
             </Stack>
-
-            <InfiniteScroll
-                dataLength={apiData.customers.length}
-                next={fetchNextPage}
-                hasMore={hasMore}
-                loader={
-                    <Stack display={loading?.more ? 'flex' : 'none'} alignItems="center" py={2}>
-                        <CircularProgress size={24} sx={{ color: '#6f6f6f' }} />
-                    </Stack>
-                }
-                scrollableTarget="customerTableContainer"
-            >
-                <FCommonTable
-                    visibleColumns={
-                        isMobile
-                            ? ['name', 'phone', 'GoTo']
-                            : ['name', 'phone', 'email', 'lastBooking', 'Bookings', 'AssignedTo', 'GoTo']
-                    }
-                    defaultOrder="name"
-                    columnWidths={
-                        isMobile
-                            ? { name: '50%', phone: '50%', GoTo: '0%' }
-                            : {
-                                  name: '15%',
-                                  phone: '15%',
-                                  email: '20%',
-                                  lastBooking: '20%',
-                                  Bookings: '10%',
-                                  AssignedTo: '15%',
-                                  GoTo: '5%',
-                              }
-                    }
-                    loading={loading?.table}
-                    columns={columns}
-                    data={dataForColumn}
-                    onRowClick={handleRowClick}
-                    fixedLayout={true}
-                    isServerSorting
-                    onSort={handleSort}
-                    serverSortOrder={order}
-                />
-            </InfiniteScroll>
         </Stack>
     );
 };
