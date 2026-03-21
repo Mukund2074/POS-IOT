@@ -215,7 +215,7 @@ export const Item = React.memo(
                     }}
                     onClick={() => onclickItem(data)}
                   >
-                    {`${data.service?.price}kr.`}
+                    {`₹${data.service?.price}`}
                   </Typography>
                 </Stack>
 
@@ -248,7 +248,7 @@ export const Item = React.memo(
                       textOverflow: 'ellipsis',
                       mr: 1
                     }}>
-                    {`${data.service?.special_price}kr.`}
+                    {`₹${data.service?.special_price}`}
                   </Typography>
                 </Stack>
 

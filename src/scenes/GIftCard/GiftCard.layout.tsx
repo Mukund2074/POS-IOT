@@ -11,9 +11,6 @@ const GiftCardLayout = () => {
     if (isAllowed('GiftCardSettings', 'update')) {
         NavOptions.push({ id: 2, title: t('GiftCard.GiftCardSettings'), link: '/gift-card/settings' });
     }
-    if (isAllowed('GiftCardSettings', 'update')) {
-        NavOptions.push({ id: 3, title: t('GiftCard.OnlineGiftCard'), link: '/gift-card/online' });
-    }
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -26,8 +23,6 @@ const GiftCardLayout = () => {
             navigate('/gift-card');
         } else if (location.pathname === '/gift-card/settings') {
             setSelectedTab(2);
-        } else if (location.pathname === '/gift-card/online') {
-            setSelectedTab(3);
         } else if (location.pathname === '/gift-card/online/create') {
             setSelectedTab(3);
         } else {

@@ -4,8 +4,6 @@ import { persistReducer, persistStore } from 'redux-persist';
 import PermissionSlice from './permissionSlice';
 import SettingsSlice from './settingsSlice';
 import RouteSlice from './routeSlice';
-import CampaignsSlice from '../redux/slices/Marketing/campaigns/campaignsSlice';
-import TriggerFlowSlice from '../redux/slices/Marketing/triggerFlow/triggerFlowSlice';
 import PaymentModalSlice from '@/redux/slices/Sales/payment/paymentModalSlice';
 
 // Configuration for redux-persist
@@ -52,8 +50,6 @@ const paymentModalPersistConfig = {
 const persistedReducer = persistReducer(persistConfig, PermissionSlice);
 const persistedSettingsReducer = persistReducer(settingPersistConfig, SettingsSlice);
 const persistedRouteReducer = persistReducer(routePersistConfig, RouteSlice);
-const persistedCampaignsReducer = persistReducer(campaignsPersistConfig, CampaignsSlice);
-const persistedTriggerFlowReducer = persistReducer(triggerFlowPersistConfig, TriggerFlowSlice);
 const persistedPaymentModalReducer = persistReducer(paymentModalPersistConfig, PaymentModalSlice);
 
 const store = configureStore({
@@ -61,8 +57,6 @@ const store = configureStore({
         user: persistedReducer,
         settings: persistedSettingsReducer,
         route: persistedRouteReducer,
-        campaigns: persistedCampaignsReducer,
-        triggerFlow: persistedTriggerFlowReducer,
         paymentModal: persistedPaymentModalReducer,
     },
     middleware: (getDefaultMiddleware) =>

@@ -63,7 +63,7 @@ export const POSProvider = ({ children }: React.PropsWithChildren) => {
             ({
                 page: 1,
                 limit: 10000,
-                getServices: true,
+                getServices: false,
                 text: '',
             }) as GetApiProductsListingParams,
         [],

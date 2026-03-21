@@ -8,9 +8,9 @@ import {
     Skeleton,
     AppBar,
     Grid2,
-    InputAdornment,
     CircularProgress,
     Tooltip,
+    Avatar,
 } from '@mui/material';
 
 import PrimaryHeading from '../commonPrimaryHeading';
@@ -33,11 +33,8 @@ import Notauthorized from '../../commonComponents/F_Notauthorized';
 import { t } from 'i18next';
 import FSelect from '../../commonComponents/F_Select';
 import { CreateEmployeeApi, DeleteEmployeeApi } from '../../../utils/Api/Employee';
-import { dividerSx } from '../../../scenes/Settings/Index';
 import FPrimaryHeading from '../../commonComponents/F_PrimaryHeading';
 import { GetServiceGroup } from '../../../utils/Api/Service';
-import FTextInput from '../../commonComponents/F_TextInput';
-import { formatCurrency } from '../../../scenes/POS/Core/pos.utils';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { api } from '../../../utils/Api/POS';
 import FButton from '../../commonComponents/F_Button';
@@ -45,6 +42,7 @@ import { getEmployeePermissionMapper, getEmployeePermissionsDefault } from './em
 import { Masonry } from '@mui/lab';
 import { Link } from 'react-router-dom';
 import { InfoOutlined } from '@mui/icons-material';
+import { dividerSx } from '../../commonComponents/DividerSx';
 
 const EmployeeSettingsOption = () => {
     const user = useSelector((state) => state.user.data);
@@ -65,7 +63,7 @@ const EmployeeSettingsOption = () => {
     const [enableSave, setEnableSave] = useState(false);
     const [loading, setLoading] = useState(false);
     const [serviceGroups, setServiceGroups] = useState([]);
-    const [assignSelectedEmployee, setAssignSelectedEmployee] = useState(empOptions[0]?.value);
+    const [assignSelectedEmployee] = useState(empOptions[0]?.value);
     const [initialValues, setInitialValues] = useState({
         id: null,
         name: '',
@@ -528,7 +526,7 @@ const EmployeeSettingsOption = () => {
         }
     };
 
-    if (!user?.settings.view_all_employees && user.role !== 'ADMIN') {
+    if (!user?.settings?.view_all_employees && user.role !== 'ADMIN') {
         return <Notauthorized />;
     }
     return (
@@ -598,127 +596,129 @@ const EmployeeSettingsOption = () => {
                                     ))}
                                 </Stack>
                             ) : (
-                                employees.map((employee, index) => (
-                                    <Stack
-                                        key={index}
-                                        flex={1}
-                                        flexDirection={'row'}
-                                        px={2}
-                                        py={1}
-                                        sx={{
-                                            width: '100%',
-                                            margin: '5px 0',
-                                            borderRadius: '15px',
-                                            border: '1px solid #D9D9D9',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                    >
-                                        <Stack
-                                            flex={1}
-                                            flexDirection="row"
-                                            justifyContent="space-between"
-                                            alignItems="center"
-                                            sx={{ px: 0 }}
-                                        >
-                                            <Typography
-                                                style={{
-                                                    width: '100%',
-                                                    size: '20px',
-                                                    color: '#A0A0A0',
+                                <Grid2 container spacing={3}>
+                                    {employees.map((employee, index) => (
+                                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                                            <Stack
+                                                sx={{
+                                                    borderRadius: '16px',
+                                                    border: '1px solid #EFEFEF',
+                                                    p: 2,
+                                                    bgcolor: '#FAFAFA',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    position: 'relative',
                                                 }}
                                             >
-                                                {employee?.name} {employee?.role === 'DOCTOR' && `(${employee?.role})`}
-                                            </Typography>
-
-                                            {user.role === 'ADMIN' && (
-                                                <Stack
-                                                    flex={1}
-                                                    flexDirection={'row'}
-                                                    justifyContent={'flex-end'}
-                                                    alignItems={'center'}
-                                                >
-                                                    <IconButton
-                                                        onClick={() => {
-                                                            // formik.setFieldValue('selectedEmployee', employee)
-                                                            setEditEmployee(employee);
-                                                            setShowModal(true);
-                                                        }}
-                                                        sx={{
-                                                            background: '#ffff',
-                                                            border: 'none',
-                                                            height: 28,
-                                                            width: 28,
-                                                            borderRadius: '50%',
-                                                            padding: 0,
-                                                        }}
+                                                {user.role === 'ADMIN' && (
+                                                    <Stack
+                                                        direction="row"
+                                                        spacing={1}
+                                                        sx={{ position: 'absolute', top: 8, right: 8 }}
                                                     >
-                                                        <img src={PencnlIconImg} alt="Edit" height={22} width={22} />
-                                                    </IconButton>
-
-                                                    {user?.id !== employee?.id && employee?.role != 'ADMIN' && (
                                                         <IconButton
                                                             onClick={() => {
                                                                 setEditEmployee(employee);
-                                                                setShowDeleteModal(true);
+                                                                setShowModal(true);
                                                             }}
                                                             sx={{
-                                                                background: '#ffff',
-                                                                border: 'none',
-                                                                marginLeft: 1,
-                                                                borderRadius: '50%',
-                                                                padding: 0,
+                                                                width: 28,
+                                                                height: 28,
+                                                                bgcolor: '#fff',
+                                                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
                                                             }}
                                                         >
-                                                            <img src={DeleteIconImg} alt="Delete" width={18} />
+                                                            <img
+                                                                src={PencnlIconImg}
+                                                                alt="Edit"
+                                                                width={14}
+                                                                height={14}
+                                                            />
                                                         </IconButton>
-                                                    )}
-                                                </Stack>
-                                            )}
-                                        </Stack>
-                                    </Stack>
-                                ))
-                            )}
-                            {(user?.settings.create_employee || user.role === 'ADMIN') && (
-                                <Stack
-                                    flex={1}
-                                    onClick={() => {
-                                        setEditEmployee(null);
-                                        setShowModal(true);
-                                    }}
-                                    flexDirection={'row'}
-                                    // px={2}
-                                    py={1}
-                                    sx={{
-                                        width: '100%',
-                                        // margin: "5px 0",
-                                        px: 2,
-                                        borderRadius: '15px',
-                                        border: '1px solid #D9D9D9',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        cursor: 'pointer',
-                                        maxHeight: 40,
-                                    }}
-                                >
-                                    {/* <Stack
-                    flex={1}
-                    flexDirection="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  > */}
-                                    <Typography
-                                        sx={{
-                                            // width: 400,
-                                            size: '20px',
-                                            color: '#A0A0A0',
-                                            mr: 'auto',
-                                        }}
-                                    >
-                                        {t('Setting.NewEmployee')}
-                                    </Typography>
-                                </Stack>
-                                // </Stack>
+                                                        {user?.id !== employee?.id && employee?.role !== 'ADMIN' && (
+                                                            <IconButton
+                                                                onClick={() => {
+                                                                    setEditEmployee(employee);
+                                                                    setShowDeleteModal(true);
+                                                                }}
+                                                                sx={{
+                                                                    width: 28,
+                                                                    height: 28,
+                                                                    bgcolor: '#fff',
+                                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                                                                }}
+                                                            >
+                                                                <img
+                                                                    src={DeleteIconImg}
+                                                                    alt="Delete"
+                                                                    width={14}
+                                                                    height={14}
+                                                                />
+                                                            </IconButton>
+                                                        )}
+                                                    </Stack>
+                                                )}
+
+                                                <Avatar
+                                                    src={
+                                                        employee?.image &&
+                                                        `${process.env.REACT_APP_IMG_URL}${employee.image}`
+                                                    }
+                                                    alt={employee?.name}
+                                                    sx={{ width: 64, height: 64, mb: 1.5 }}
+                                                />
+                                                <Typography
+                                                    noWrap
+                                                    sx={{
+                                                        fontWeight: 600,
+                                                        color: '#1F1F1F',
+                                                        textAlign: 'center',
+                                                        maxWidth: '100%',
+                                                    }}
+                                                >
+                                                    {employee?.name}
+                                                </Typography>
+                                                <Typography
+                                                    sx={{ fontSize: '12px', color: '#888', mb: 1, textAlign: 'center' }}
+                                                >
+                                                    {employee?.role === 'DOCTOR'
+                                                        ? `${employee?.role}`
+                                                        : employee?.role || 'Employee'}
+                                                </Typography>
+                                            </Stack>
+                                        </Grid2>
+                                    ))}
+                                    {(user?.settings?.create_employee || user.role === 'ADMIN') && (
+                                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                                            <Stack
+                                                onClick={() => {
+                                                    setEditEmployee(null);
+                                                    setShowModal(true);
+                                                }}
+                                                sx={{
+                                                    borderRadius: '16px',
+                                                    border: '1px dashed #D9D9D9',
+                                                    p: 2,
+                                                    minHeight: 140,
+                                                    height: '100%',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer',
+                                                    bgcolor: '#fff',
+                                                    transition: 'all 0.2s ease-in-out',
+                                                    '&:hover': {
+                                                        bgcolor: '#FAFAFA',
+                                                        borderColor: '#A0A0A0',
+                                                    },
+                                                }}
+                                            >
+                                                <Typography sx={{ color: '#A0A0A0', fontWeight: 500 }}>
+                                                     {t('Setting.NewEmployee')}
+                                                </Typography>
+                                            </Stack>
+                                        </Grid2>
+                                    )}
+                                </Grid2>
                             )}
                         </Grid2>
                     </Grid2>
@@ -858,264 +858,6 @@ const EmployeeSettingsOption = () => {
                             </Grid2>
                         </React.Fragment>
                     )}
-
-                    {/* Service assignment */}
-
-                    <React.Fragment>
-                        <Divider sx={{ ...dividerSx }} />
-
-                        <Grid2 container sx={{ p: { xs: 1, md: 5 } }}>
-                            <Grid2 size={{ xs: 12, md: 4 }}>
-                                <PrimaryHeading text={t('Setting.ServiceAssign')} />
-                                <SecondaryHeading text={t('Setting.ServiceAssignDescription')} />
-                            </Grid2>
-                            <Grid2 size={{ xs: 12, md: 8 }} sx={{ px: { xs: 0, sm: 2 } }}>
-                                <Stack mt={{ xs: 2, sm: 0 }}>
-                                    <FPrimaryHeading text={t('Common.SelectEmployee')} fontSize={16} />
-                                    <FSelect
-                                        id={'serviceAssign.employee_id'}
-                                        value={assignSelectedEmployee}
-                                        onChange={(e) => {
-                                            const findEmp = empOptions?.find((emp) => emp?.value === e?.target?.value);
-                                            setAssignSelectedEmployee(findEmp?.value);
-                                        }}
-                                        options={empOptions}
-                                        sx={{ width: { xs: '100%', md: '30%' }, mt: 1 }}
-                                    />
-                                </Stack>
-
-                                {assignSelectedEmployee && (
-                                    <Stack marginTop={2}>
-                                        {serviceGroups?.length === 0 && (
-                                            <>
-                                                <Skeleton animation="wave" height={60} />
-                                                <Skeleton animation="wave" height={60} />
-                                                <Skeleton animation="wave" height={60} />
-                                                <Skeleton animation="wave" height={60} />
-                                                <Skeleton animation="wave" height={60} />
-                                            </>
-                                        )}
-                                        {serviceGroups.map((group, index) => {
-                                            const isUngrouped = group?.group === 'Ungrouped services';
-                                            const hasServices = group?.services && group.services.length > 0;
-
-                                            if (!isUngrouped && !hasServices) {
-                                                return null;
-                                            }
-
-                                            return (
-                                                <Stack key={group?.id} mb={2}>
-                                                    <Stack
-                                                        sx={{
-                                                            display: 'flex',
-                                                            flexDirection: { xs: 'column', sm: 'row' },
-                                                            alignItems: 'center',
-                                                            gap: 2,
-                                                            mb: { xs: index === 0 ? 2 : 0, sm: 1 },
-                                                        }}
-                                                    >
-                                                        <Typography
-                                                            variant="subtitle1"
-                                                            sx={{
-                                                                fontWeight: 700,
-                                                                mb: 1,
-                                                                width: { xs: '100%', sm: '33.33%' },
-                                                            }}
-                                                        >
-                                                            {isUngrouped
-                                                                ? t('Setting.UngroupedServices')
-                                                                : group?.group}
-                                                        </Typography>
-
-                                                        {index === 0 && hasServices && (
-                                                            <React.Fragment>
-                                                                <Typography
-                                                                    variant="subtitle1"
-                                                                    sx={{
-                                                                        fontWeight: 700,
-                                                                        mb: 1,
-                                                                        width: { xs: '100%', sm: '50%' },
-                                                                        display: { xs: 'none', sm: 'flex' },
-                                                                        ml: 1,
-                                                                    }}
-                                                                >
-                                                                    {t('Setting.ServicePrice')}
-                                                                </Typography>
-
-                                                                <Typography
-                                                                    variant="subtitle1"
-                                                                    sx={{
-                                                                        fontWeight: 700,
-                                                                        mb: 1,
-                                                                        display: { xs: 'none', sm: 'flex' },
-                                                                        width: { xs: '100%', sm: '15%' },
-                                                                        alignItems: 'flex-end',
-                                                                        justifyContent: 'flex-end',
-                                                                        gap: 6,
-                                                                        px: 4,
-                                                                        whiteSpace: 'nowrap',
-                                                                    }}
-                                                                >
-                                                                    <span>{t('Setting.EmployeePrice')}</span>
-                                                                    <Tooltip title={t('Setting.AssignTooltip')} arrow>
-                                                                        {t('Setting.Assign')}
-                                                                    </Tooltip>
-                                                                </Typography>
-                                                            </React.Fragment>
-                                                        )}
-                                                    </Stack>
-
-                                                    {hasServices &&
-                                                        group.services.map((service) => {
-                                                            const index = servicesSelected.findIndex(
-                                                                (ser) => ser?.serviceId === service?.id,
-                                                            );
-
-                                                            const selected = index !== -1;
-
-                                                            return (
-                                                                <Stack
-                                                                    key={service?.id}
-                                                                    sx={{
-                                                                        border: '1px solid #d9d9d9',
-                                                                        borderRadius: '12px',
-                                                                        flexDirection: { xs: 'column', sm: 'row' },
-                                                                        gap: { xs: 0, sm: 2 },
-                                                                        mb: { xs: 2, sm: 1 },
-                                                                        px: 2,
-                                                                        alignItems: 'center',
-                                                                    }}
-                                                                >
-                                                                    {/* Top row */}
-                                                                    <Stack
-                                                                        direction="row"
-                                                                        sx={{
-                                                                            width: '100%',
-                                                                            justifyContent: {
-                                                                                xs: 'space-between',
-                                                                                sm: 'flex-between',
-                                                                            },
-                                                                            mt: { xs: 1, sm: 0 },
-                                                                            gap: { sm: 2 },
-                                                                            alignItems: 'flex-start',
-                                                                        }}
-                                                                    >
-                                                                        <Stack
-                                                                            sx={{
-                                                                                width: { xs: '70%', sm: '50%' },
-                                                                                color: '#1a1a1a',
-                                                                                fontSize: 16,
-                                                                                fontWeight: 500,
-                                                                                overflow: 'hidden',
-                                                                                display: '-webkit-box',
-                                                                                WebkitBoxOrient: 'vertical',
-                                                                                WebkitLineClamp: 2, // 👈 2 lines
-                                                                                textOverflow: 'ellipsis',
-                                                                                wordBreak: 'break-all', // 👈 important for long words
-                                                                            }}
-                                                                        >
-                                                                            {service?.name}
-                                                                        </Stack>
-
-                                                                        <Stack
-                                                                            sx={{
-                                                                                width: { xs: '25%', sm: '15%' },
-                                                                                textAlign: 'right',
-                                                                                flexShrink: 0,
-                                                                                marginRight: { xs: 0, sm: 5 },
-                                                                                color: '#666666',
-                                                                                fontSize: 14,
-                                                                                fontWeight: 500,
-                                                                            }}
-                                                                        >
-                                                                            {formatCurrency(service?.price)}
-                                                                        </Stack>
-                                                                    </Stack>
-
-                                                                    <FPrimaryHeading
-                                                                        text={t('Setting.EmployeePrice')}
-                                                                        sx={{
-                                                                            fontSize: 14,
-                                                                            display: { xs: 'block', sm: 'none' },
-                                                                            fontWeight: 600,
-                                                                            textAlign: 'left',
-                                                                            width: '100%',
-                                                                            mt: 2,
-                                                                        }}
-                                                                    />
-
-                                                                    <Stack
-                                                                        direction="row"
-                                                                        alignItems="center"
-                                                                        gap={2}
-                                                                        sx={{
-                                                                            width: '100%',
-                                                                            justifyContent: {
-                                                                                xs: 'space-between',
-                                                                                sm: 'flex-end',
-                                                                            },
-                                                                        }}
-                                                                    >
-                                                                        <FTextInput
-                                                                            value={
-                                                                                selected
-                                                                                    ? Number(
-                                                                                          servicesSelected[index]
-                                                                                              ?.employeePrice,
-                                                                                      ) || 0
-                                                                                    : service?.price
-                                                                            }
-                                                                            onChange={(e) => {
-                                                                                const raw = e.target.value.replace(
-                                                                                    /[^\d.]/g,
-                                                                                    '',
-                                                                                );
-                                                                                const value =
-                                                                                    raw === '' ? 0 : Number(raw);
-
-                                                                                if (index === -1) return;
-
-                                                                                update(index, {
-                                                                                    ...servicesSelected[index],
-                                                                                    employeePrice: value,
-                                                                                });
-                                                                            }}
-                                                                            disabled={!selected}
-                                                                            width={{ xs: '100px', sm: 150 }}
-                                                                            sx={{
-                                                                                marginTop: { xs: 0, sm: '6px' },
-                                                                                marginBottom: '6px',
-                                                                            }}
-                                                                            slotProps={{
-                                                                                input: {
-                                                                                    endAdornment: (
-                                                                                        <InputAdornment position="end">
-                                                                                            <Typography variant="body2">
-                                                                                                {t('POS.Currency')}
-                                                                                            </Typography>
-                                                                                        </InputAdornment>
-                                                                                    ),
-                                                                                },
-                                                                            }}
-                                                                        />
-                                                                        <FSwitch
-                                                                            checked={selected}
-                                                                            onChange={(e, checked) =>
-                                                                                handleToggleService(service, checked)
-                                                                            }
-                                                                        />
-                                                                    </Stack>
-                                                                </Stack>
-                                                            );
-                                                        })}
-                                                </Stack>
-                                            );
-                                        })}
-                                    </Stack>
-                                )}
-                            </Grid2>
-                        </Grid2>
-                    </React.Fragment>
 
                     {showModal && (
                         <EmployeeModel

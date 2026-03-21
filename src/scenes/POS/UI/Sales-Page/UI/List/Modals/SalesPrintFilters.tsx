@@ -44,7 +44,7 @@ export default function SalesPrintFilters({
         endDate: moment(),
         paymentType: 'ALL',
         salesType: 'NONE',
-        type: 'pdf',
+        type: 'csv',
     };
 
     const formik = useFormik({
@@ -188,7 +188,6 @@ export default function SalesPrintFilters({
                         <POSSelect
                             value={formik.values.type}
                             options={[
-                                { value: 'pdf', label: 'PDF' },
                                 { value: 'csv', label: 'CSV' },
                             ]}
                             onChange={(e) => formik.setFieldValue('type', e.target.value)}

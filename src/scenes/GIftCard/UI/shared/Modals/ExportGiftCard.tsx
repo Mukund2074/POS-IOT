@@ -33,7 +33,7 @@ export default function ExportGiftCard({ open, onClose, giftCardFilters }: Expor
         keyword: '',
         fromDate: moment().subtract(3, 'months').format('YYYY-MM-DD'),
         toDate: moment().add(3, 'months').format('YYYY-MM-DD'),
-        type: 'pdf',
+        type: 'csv',
     };
 
     const formik = useFormik({
@@ -73,7 +73,7 @@ export default function ExportGiftCard({ open, onClose, giftCardFilters }: Expor
             if (QueryString.toDate) params.append('toDate', QueryString.toDate);
             if (encodedToken) params.append('et', encodedToken);
 
-            const url = `${process.env.REACT_APP_URL2}/api/gift-cards-list/pdf?${params.toString()}`;
+            const url = `${process.env.REACT_APP_URL2}/api/gift-cards-list/csv?${params.toString()}`;
 
             window.open(url, '_blank');
         } catch (error) {
@@ -171,7 +171,6 @@ export default function ExportGiftCard({ open, onClose, giftCardFilters }: Expor
                         <POSSelect
                             value={formik.values.type}
                             options={[
-                                { value: 'pdf', label: 'PDF' },
                                 { value: 'csv', label: 'CSV' },
                             ]}
                             onChange={(e) => formik.setFieldValue('type', e.target.value)}

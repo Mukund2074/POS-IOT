@@ -19,10 +19,6 @@ const categories = {
                 route: '/sales/products',
             },
             {
-                id: t('Report.ServiceSales'),
-                route: '/sales/services',
-            },
-            {
                 id: t('POS.PaymentMethod'),
                 route: '/sales/payment-methods',
             },
@@ -71,21 +67,8 @@ const categories = {
                 id: t('Report.Receivables'),
                 route: '/customers/receivables',
             },
-            {
-                id: t('Report.ExcludedFromBooking'),
-                route: '/customers/excluded-booking',
-            },
         ],
     },
-    // business: {
-    //     label: 'business',
-    //     reports: [
-    //         {
-    //             id: 'consumption-goods',
-    //             route: '/business/consumption',
-    //         },
-    //     ],
-    // },
 };
 
 const ReportSection = () => {

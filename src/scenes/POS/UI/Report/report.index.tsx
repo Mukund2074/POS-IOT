@@ -39,7 +39,6 @@ const Report = () => {
         if (
             location.pathname === '/pos/report/sales/weekly-revenue' ||
             location.pathname === '/pos/report/sales/products' ||
-            location.pathname === '/pos/report/sales/services' ||
             location.pathname === '/pos/report/sales/payment-methods' ||
             location.pathname === '/pos/report/sales/vat' ||
             location.pathname === '/pos/report/sales/gift-cards' ||
@@ -49,7 +48,6 @@ const Report = () => {
             location.pathname === '/pos/report/customers/unique' ||
             location.pathname === '/pos/report/customers/postal-codes' ||
             location.pathname === '/pos/report/customers/new' ||
-            location.pathname === '/pos/report/customers/excluded-booking' ||
             location.pathname === '/pos/report/customers/outstanding' ||
             location.pathname === '/pos/report/customers/receivables'
         ) {
