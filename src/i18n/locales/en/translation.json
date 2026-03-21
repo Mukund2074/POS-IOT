@@ -983,7 +983,7 @@
         "BusinessStreetNameIsRequired": "business street name is required",
         "PleaseEnterValidAddress": "Please enter valid address",
         "BusinessPhoneNumberIsRequired": "Business phone number is required",
-        "MustBeExactly8Digits": "Must be exactly 8 digits",
+        "MustBeExactly10Digits": "Must be exactly 10 digits",
         "PleaseEnterValidBusinessPhoneNumber": "Please enter valid business phone number",
         "CVRNumberIsRequired": "CVR number is required",
         "PleaseEnterValidCvrNumber": "Please enter valid cvr number",

@@ -14,6 +14,9 @@ import GiftCardsCustomer from './components/customer/customerDetail/Gift-Cards';
 // Settings
 import EmployeeSettingsOption from './components/settings/employee';
 
+// Settings
+import SettingsLayout from './scenes/settigs/settings.index';
+
 // POS
 import POSLayout from './scenes/POS/POS.layout';
 
@@ -54,7 +57,6 @@ import UniqueCustomer from './scenes/POS/UI/Report/UI/Customer/UniqueCustomer';
 import TopCustomers from './scenes/POS/UI/Report/UI/Customer/TopCustomer';
 import CustomerByPostal from './scenes/POS/UI/Report/UI/Customer/CustomerByPostal';
 import NewCustomers from './scenes/POS/UI/Report/UI/Customer/NewCustomers';
-import ExcludedFromBooking from './scenes/POS/UI/Report/UI/Customer/ExcludedFromBooking';
 import Outstanding from './scenes/POS/UI/Report/UI/Customer/Outstanding';
 import Receivables from './scenes/POS/UI/Report/UI/Customer/Receivables';
 import HealthDeclationBookingList from './components/customer/customerDetail/HealthDeclarationBookingList/HealthDeclationBookingList';
@@ -92,6 +94,10 @@ export const router = createBrowserRouter([
             {
                 path: 'customers',
                 element: <ProtectedRoute element={<AddCustomerForm />} />,
+            },
+            {
+                path: 'settings',
+                element: <ProtectedRoute element={<SettingsLayout />} />,
             },
             {
                 path: 'customers/:id',
