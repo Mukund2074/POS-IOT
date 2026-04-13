@@ -486,6 +486,9 @@ const GeneralSettingsOption = () => {
                         sx={{
                             fontFamily: D.sansFont,
                             fontSize: { xs: 22, md: 26 },
+                            mx: { xs: 'auto', md: 0 },
+                            textAlign: { xs: 'center', md: 'left' },
+                            width: { xs: '100%', md: 'auto' },
                             fontWeight: 700,
                             color: D.primary,
                         }}

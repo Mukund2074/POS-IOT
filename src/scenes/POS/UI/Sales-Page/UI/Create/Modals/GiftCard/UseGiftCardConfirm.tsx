@@ -54,7 +54,7 @@ export default function UseGiftCardConfirm({
                                 {t('POS.GiftCardAmount')}:
                             </Typography>
                             <Typography variant="h6" color="primary">
-                                {amountComparison?.residueValue || 0} Kr.
+                                {amountComparison?.residueValue || 0} ₹.
                             </Typography>
                         </Stack>
 
@@ -66,7 +66,7 @@ export default function UseGiftCardConfirm({
                                 :
                             </Typography>
                             <Typography variant="h6" color="error">
-                                {amountComparison?.requiredAmount || 0} Kr.
+                                {amountComparison?.requiredAmount || 0} ₹.
                             </Typography>
                         </Stack>
 

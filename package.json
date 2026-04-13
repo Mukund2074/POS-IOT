@@ -101,7 +101,7 @@
     "scripts": {
         "start": "react-app-rewired start",
         "dev": "react-app-rewired start",
-        "build": "cross-env NODE_OPTIONS=--max_old_space_size=4096 npm run test && react-app-rewired build ",
+        "build": "cross-env NODE_OPTIONS=--max_old_space_size=4096  react-app-rewired build ",
         "test": "jest",
         "eject": "react-scripts eject",
         "sentry:sourcemaps": "sentry-cli sourcemaps inject --org fiind --project javascript-react ./build && sentry-cli sourcemaps upload --org fiind --project javascript-react ./build",

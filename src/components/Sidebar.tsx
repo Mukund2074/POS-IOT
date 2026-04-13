@@ -12,10 +12,8 @@ import { route } from '../context/routeSlice';
 import { useQueryClient } from '@tanstack/react-query';
 
 // @ts-ignore
-import logo from '@/assets/fiind-orange-logo.png';
 import SidebarIcon from '@/assets/Marketing/SidebarIcon.svg';
 
-import BahlouLogoFull from '@/assets/Bahlou_logo.png';
 import { cnMerge } from '@/utils/cnMerge';
 import { useSelector } from 'react-redux';
 // @ts-ignore
@@ -115,22 +113,26 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
                 <div>
                     {/* Header */}
                     <div
-                        className={`flex absolute items-center top-4 right-0  ${isCollapse ? 'justify-center items-center left-0' : 'justify-between  -left-3'} px-4 mb-4`}
+                        className={`flex absolute items-center top-4 right-0  ${isCollapse ? 'justify-center items-center left-0' : 'justify-between  -left-3'} px-4 mb-4 md:mx-0 ml-auto`}
                     >
-                        <img
-                            src={isCollapse && !isMobile ? logo : BahlouLogoFull}
-                            alt="logo_icon"
-                            className={cnMerge(isCollapse && !isMobile ? 'h-6 hidden' : 'h-8')}
-                        />
+                        <h2
+                            className={cnMerge(
+                                'flex items-center gap-2 p-0 m-0 mx-2',
+                                isCollapse ? 'hidden' : 'justify-start',
+                            )}
+                        >
+                            <span className="text-2xl font-bold">POS</span>
+                            <span className="text-2xl font-bold text-primary-500">Iot</span>
+                        </h2>
                         <img
                             src={SidebarIcon}
                             alt="sidebar_icon"
-                            className={`cursor-pointer h-5 w-5 transition-transform ease-in-out duration-500 ${isMobile || isMobile === undefined ? 'hidden' : 'block'} `}
+                            className={`cursor-pointer h-5 w-5 ml-auto transition-transform ease-in-out duration-500 ${isMobile || isMobile === undefined ? 'hidden' : 'block'} `}
                             onClick={() => !isMobile && setCollapse(!isCollapse)}
                         />
                     </div>
 
-                    <NavigationMenu.Root className="h-full mt-12">
+                    <NavigationMenu.Root className="h-full md:mt-12">
                         <Accordion.Root type="multiple" className="px-2 space-y-2">
                             {sidebarItems.map((item: SideBarTypes) => {
                                 const isActive = location.pathname.startsWith(item.path);
@@ -180,6 +182,10 @@ const Sidebar = forwardRef<HTMLDivElement, any>((props, ref) => {
                     {(user?.role === 'ADMIN' || permission[PERMISSION_MAP['settings']]) && (
                         <Link
                             to={settingsItem.path}
+                            onClick={() => {
+                                onClose?.();
+                                setCollapse(false);
+                            }}
                             className={`flex items-center gap-3 px-3 py-2 no-underline text-text-secondary ${
                                 location.pathname === settingsItem.path ? 'icon-active' : ''
                             } ${isMobile ? 'justify-start' : isCollapse && 'justify-center'}`}

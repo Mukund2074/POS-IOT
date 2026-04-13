@@ -1267,7 +1267,7 @@
         "PleaseSelectTemplate": "Please select template",
         "Sender": "Sender",
         "SMSEmailTitle": "SMS & Email to customers",
-        "SMSEmailDesc": "If you wish to customize messages sent to customers, you can do it here.\n\nPrices:\n\nSMS: 0, 70 kr. ex. moms. pr. SMS \nEmail: Free",
+        "SMSEmailDesc": "If you wish to customize messages sent to customers, you can do it here.\n\nPrices:\n\nSMS: 0, 70 ₹. ex. moms. pr. SMS \nEmail: Free",
         "VerifyCustomer": "Verify customers before booking",
         "BkConf": "Booking confirmation",
         "SmsConMsg": "SMS confirmation message",

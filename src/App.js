@@ -16,7 +16,6 @@ import RadixToastProvider from './components/radix/RadixToastProvider';
 import { CustomerProvider } from './context/customer/CustomerContext';
 import Sidebar from './components/Sidebar';
 import SidebarIcon from '@/assets/Marketing/SidebarIcon.svg';
-import { MdClose } from 'react-icons/md';
 import { LayoutContext } from './context/LayoutContext';
 import { ToastContainer } from 'react-toastify';
 import { useSelector } from 'react-redux';
@@ -77,20 +76,17 @@ function App() {
                     const employeePOSPermissions = parsedPosSettings?.employeePermissions?.[employee_id] || null;
                     localStorage.setItem('employees', JSON.stringify(employess));
                     const selectedEmp = employess && employess.find((emp) => emp.id == employee_id);
-                    dispatch(
-                        user({ ...selectedEmp, pos_settings: employeePOSPermissions }),
-                    );
+                    dispatch(user({ ...selectedEmp, pos_settings: employeePOSPermissions }));
                     dispatch(settings({ from_dashboard: true, from_app: isAppFromURL, isDoctor }));
-                     refreshSettings();
+                    refreshSettings();
 
                     if (isAppFromURL) {
                         navigate('pos/cashdrawer');
                     }
-                    
+
                     if (isDoctor) {
                         navigate('/customers', { replace: true });
-                    } 
-                    
+                    }
                 }
                 // navigate("/calendar")
             } else if (!auth_token && !auth2 && !isPublicBookingRoute) {
@@ -205,7 +201,7 @@ function App() {
                             <img
                                 src={SidebarIcon}
                                 alt="sidebar_icn"
-                                className={`${location?.pathname === '/' ? 'hidden' : 'fixed'} px-2 py-2.5 cursor-pointer ${location?.pathname === '/calendar' ? 'bg-transparent' : 'bg-white'}`}
+                                className={`${location?.pathname === '/' ? 'hidden' : 'fixed'} p-2 mt-1 cursor-pointer !bg-transparent border-[1px] border-solid border-border-default rounded-full`}
                                 onClick={() => {
                                     setCollapse(true);
                                     setIsSidebarOpen(true);
@@ -248,15 +244,6 @@ function App() {
                                         setIsSidebarOpen(false);
                                         setCollapse(false);
                                     }}
-                                    PaperProps={{
-                                        sx: {
-                                            backgroundColor: 'transparent',
-                                            width: '100%',
-                                            height: '100vh',
-                                            position: 'fixed',
-                                            zIndex: 1000,
-                                        },
-                                    }}
                                 >
                                     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                                         <Sidebar
@@ -265,25 +252,6 @@ function App() {
                                             setCollapse={setCollapse}
                                             isMobile={isMobile}
                                             onClose={() => setIsSidebarOpen(false)}
-                                        />
-
-                                        <MdClose
-                                            style={{
-                                                color: '#fff',
-                                                fontSize: 40,
-                                                background: '#010101',
-                                                padding: 10,
-                                                borderRadius: '50%',
-                                                cursor: 'pointer',
-                                                position: 'absolute',
-                                                top: '50%',
-                                                right: '20%',
-                                                transform: 'translateY(-50%)',
-                                            }}
-                                            onClick={() => {
-                                                setIsSidebarOpen(false);
-                                                setCollapse(false);
-                                            }}
                                         />
                                     </div>
                                 </Drawer>

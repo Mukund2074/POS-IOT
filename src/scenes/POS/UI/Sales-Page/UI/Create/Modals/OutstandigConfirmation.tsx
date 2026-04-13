@@ -66,12 +66,12 @@ export default function OutstandigConfirmation({
                 <IconButton sx={{ position: 'absolute', top: 0, right: 0 }} onClick={onClose}>
                     <Close />
                 </IconButton>
-                {/* The customer has an outstanding on 6000 kr
+                {/* The customer has an outstanding on 6000 ₹
 Do you want to add the outstanding amount to the customer's expense right away
  */}
 
                 <POSHeading
-                    text={`${t('POS.OutstandingConfirmationDesc')} ${customer?.outstandingAmount.toFixed(2) ?? ''} kr`}
+                    text={`${t('POS.OutstandingConfirmationDesc')} ${customer?.outstandingAmount.toFixed(2) ?? ''} ₹`}
                 />
                 <POSHeading text={t('POS.OutstandingConfirmationDesc2')} sx={{ fontSize: 15, fontWeight: 400 }} />
                 <Stack

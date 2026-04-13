@@ -1,30 +1,23 @@
-import { Box, CircularProgress, Grid2, Stack, Tooltip, Typography, Button, AppBar, useMediaQuery } from '@mui/material';
+import { Box, Stack, Typography, Grid2, CircularProgress } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import LockIcon from '../../../../assets/lock.png';
 import moment from 'moment';
 import apiFetcher from '../../../../utils/interCeptor';
-import { HttpStatusCode } from 'axios';
-import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import CustomDeleteModal from '../../../deleteAlertModal';
-import { t } from 'i18next';
 import { useSelector } from 'react-redux';
-import Upload from '../../../../assets/uploadFile.svg';
-import { BlockCustomerApi, DeleteCustomerApi } from '../../../../utils/Api/Customer';
-import { useMode } from '../../../../theme';
-import { CountryList } from '../../../../data/CountryList';
+import { DeleteCustomerApi } from '../../../../utils/Api/Customer';
+import theme from '../../../../ui/theme'; // Ensure this points to your unified tokens
 import { useCustomer } from '../../../../context/customer/CustomerContext';
-import CustomerCards from './CustomerCards';
-import AttachmentsList from './AttachmentsList';
 import { formatPrice } from '../../../../scenes/POS/Core/pos.utils';
 import RadixInput from '../../../radix/RadixInput';
 import RadixTextarea from '../../../radix/RadixTextarea';
 import RadixSelect from '../../../radix/RadixSelect';
 import RadixPhoneField from '../../../radix/RadixPhoneField';
-import RadixSwitch from '../../../radix/RadixSwitch';
 import RadixButton from '../../../radix/RadixButton';
+import { toast } from 'sonner';
+import { UserRound, MapPin, NotebookPen } from 'lucide-react';
 
 const dateObject = {
     dates: Array.from({ length: 31 }, (_, i) => i + 1),
@@ -33,48 +26,17 @@ const dateObject = {
 };
 
 const CustomerInformation = () => {
-    const [theme] = useMode();
-
     const navigate = useNavigate();
+    const { id } = useParams();
 
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-    const [isChanges, setIsChanges] = useState(false);
     const [havePermission, setHavePermission] = useState(false);
     const [deleteCustomerModel, setDeleteCustomerModel] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState([]);
-    const [deletedFileIds, setDeletedFileIds] = useState([]);
-    const [selectedDate, setSelectedDate] = useState({
-        day: '',
-        month: '',
-        year: '',
-    });
-    const { id } = useParams();
-    const [customer, setCustomer] = useState({});
-    const [phoneLength, setPhoneLength] = useState({
-        phone1: { maxLength: 11, minLength: 11 },
-        phone2: { maxLength: 11, minLength: 11 },
-    });
-    const [blockCustomerModal, setBlockCustomerModal] = useState(false);
+    const [saveLoading, setSaveLoading] = useState(false);
+    const [selectedDate, setSelectedDate] = useState({ day: '', month: '', year: '' });
+
     const isEdit = id !== 'create' && id;
     const user = useSelector((state) => state.user.data);
-    const [BlockCustomerLoading, setBlockCustomerLoading] = useState(false);
-    const [saveLoading, setSaveLoading] = useState(false);
-    const [isBlocked, setIsBlocked] = useState(false);
-
-    const { customer: customerData, customerSaleDetails, loading } = useCustomer();
-
-    useEffect(() => {
-        if (customerData && isEdit) {
-            setCustomer(customerData);
-            setIsBlocked(customerData?.block_booking);
-            setInitialValues({
-                ...customerData,
-                block_booking: customerData?.block_booking,
-            });
-            setUploadedFiles(customerData?.attachment_objs);
-        }
-    }, [customerData, isEdit]);
+    const { customer: customerData } = useCustomer();
 
     useEffect(() => {
         if (user && (user?.settings?.edit_customers || user?.role === 'ADMIN')) {
@@ -82,1148 +44,313 @@ const CustomerInformation = () => {
         }
     }, [user]);
 
+    // Update form when context data arrives
     useEffect(() => {
-        if (selectedDate && selectedDate.year && selectedDate.month && selectedDate.day) {
-            const formattedDate = `${selectedDate.year}-${
-                selectedDate.month < 10 ? `0${selectedDate.month}` : selectedDate.month
-            }-${selectedDate.day < 10 ? `0${selectedDate.day}` : selectedDate.day}`;
+        if (customerData && isEdit) {
+            formik.setValues({ ...customerData });
+            if (customerData.birthday) {
+                setSelectedDate({
+                    day: moment(customerData.birthday).date(),
+                    month: moment(customerData.birthday).month() + 1,
+                    year: moment(customerData.birthday).year(),
+                });
+            }
+        }
+    }, [customerData, isEdit]);
+
+    // Handle Birthday String Generation
+    useEffect(() => {
+        if (selectedDate.year && selectedDate.month && selectedDate.day) {
+            const formattedDate = `${selectedDate.year}-${String(selectedDate.month).padStart(2, '0')}-${String(selectedDate.day).padStart(2, '0')}`;
             formik.setFieldValue('birthday', formattedDate);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedDate]);
 
-    const isLeapYear = (year) => moment(`${year}-02-29`, 'YYYY-MM-DD').isValid();
-
-    const getDisabledMonths = () => {
-        const { day } = selectedDate;
-        if (!day) return [];
-        if (day === 30) return [2];
-        if (day === 31) return [2, 4, 6, 9, 11];
-        return [];
-    };
-
-    const getDisabledYears = () => {
-        const { day, month } = selectedDate;
-        if (day === 29 && month === 2) {
-            return dateObject.years.filter((year) => !isLeapYear(year));
-        }
-        return [];
-    };
-
-    const mapOptions = (array, disabledItems = []) => {
-        return array.map((item) => ({
-            value: item,
-            label: item,
-            disabled: disabledItems.includes(item),
-        }));
-    };
-
-    const handleSelectDate = ({ date, type }) => {
-        if (type === 'day') {
-            setSelectedDate((prevState) => ({
-                ...prevState,
-                month: 0,
-                year: 0,
-            }));
-        }
-        if (type === 'month') {
-            setSelectedDate((prevState) => ({
-                ...prevState,
-                year: 0,
-            }));
-        }
-        setSelectedDate((prevState) => ({
-            ...prevState,
-            [type]: date,
-        }));
-    };
-
-    useEffect(() => {
-        if (customer?.birthday) {
-            setSelectedDate({
-                day: moment(customer.birthday).date(),
-                month: moment(customer.birthday).month() + 1,
-                year: moment(customer.birthday).year(),
-            });
-        }
-    }, [customer?.birthday]);
-
-    const validationSchema = Yup.object({
-        name: Yup.string().required(t('Customer.CustomerNameError')),
-        address: Yup.string().nullable(),
-        email: Yup.string().email(t('Customer.EmailError')).nullable(),
-        zip_code: Yup.string().nullable(),
-        city: Yup.string().nullable(),
-        country_code: Yup.string().nullable(),
-        country_code2: Yup.string().nullable(),
-        phone_number: Yup.string()
-            .required(t('Customer.PhoneNumberError'))
-            .matches(
-                new RegExp(`^\\d{${phoneLength?.phone1?.minLength},${phoneLength?.phone1?.maxLength}}$`),
-                `${t('Customer.InvalidPhone')}`,
-            )
-            .typeError(t('Customer.PhoneNumberTypeError')),
-        marketplace_pointer: Yup.string().nullable(),
-        note: Yup.string().nullable(),
-        phone_number2: Yup.string()
-            // .matches(/^\d{8}$/, t('Customer.PhoneNumber2Invalid'))
-            .matches(
-                new RegExp(`^\\d{${phoneLength?.phone2?.minLength},${phoneLength?.phone2?.maxLength}}$`),
-                `${t('Customer.InvalidPhone')}`,
-            )
-            .typeError(t('Customer.PhoneNumber2TypeError'))
-            .nullable()
-            .notRequired(),
-        birthday: Yup.string()
-            .nullable()
-            .notRequired()
-            .matches(/^\d{4}-\d{2}-\d{2}$/, t('Customer.BirthdayInvalidFormat'))
-            .test('is-valid-date', t('Customer.BirthdayInvalidDate'), (value) => {
-                return (
-                    !value ||
-                    (moment(value, 'YYYY-MM-DD', true).isValid() &&
-                        moment(value, 'YYYY-MM-DD', true).format('YYYY-MM-DD') === value)
-                );
-            })
-            .max(new Date(), t('Customer.BirthdayMaxDate')),
-
-        cpr: Yup.string().nullable().min(11, t('Customer.CprError')),
-        attachments: Yup.array().nullable(),
-        isBlocked: Yup.boolean(),
-        marketing_permission: Yup.boolean(),
-    });
-
-    const [initialValues, setInitialValues] = useState({
-        name: customer?.name || '',
-        address: customer?.address || '',
-        email: customer?.email || '',
-        zip_code: customer?.zip_code || '',
-        city: customer?.city || '',
-        phone_number: customer?.phone_number || '',
-        marketplace_pointer: customer?.marketplace_pointer || '',
-        note: customer?.note || '',
-        phone_number2: customer?.phone_number2 || '',
-        birthday: customer?.birthday || null,
-        cpr: customer?.cpr || '',
-        attachments: customer?.attachments || [],
-        country_code: customer?.country_code ?? '+91',
-        country_code2: customer?.country_code2 ?? '+91',
-        country_iso_code: customer?.country_iso_code || 'IN',
-        country_iso_code2: customer?.country_iso_code2 || 'IN',
-        isBlocked: customer?.block_booking,
-        bonus: customer?.bonus || 0,
-        marketing_permission: customer?.marketing_permission || false,
-    });
-
     const formik = useFormik({
-        initialValues: initialValues,
-        validationSchema,
-        enableReinitialize: true,
-        onSubmit: (values) => {
-            const payload = {
-                name: values.name || '',
-                address: values.address || '',
-                email: values.email || '',
-                zip_code: values.zip_code || '',
-                city: values.city || '',
-                phone_number: values.phone_number?.startsWith('+91')
-                    ? values?.phone_number?.replace('+91', '')
-                    : values.phone_number || '',
-                marketplace_pointer: values.marketplace_pointer || '',
-                note: values.note || '',
-                phone_number2: values.phone_number2?.startsWith('+91')
-                    ? values?.phone_number2?.replace('+91', '')
-                    : values.phone_number2 || '',
-                birthday: values.birthday || null,
-                cpr: values.cpr || '',
-                attachments: values?.attachments || [],
-                country_code: values?.country_code || '+91',
-                country_code2: values?.country_code2 || '+91',
-                country_iso_code: values?.country_iso_code || 'IN',
-                country_iso_code2: values?.country_iso_code2 || 'IN',
-                bonus: values?.bonus || 0,
-                marketing_permission: values?.marketing_permission || false,
-            };
+        initialValues: {
+            name: '',
+            address: '',
+            email: '',
+            zip_code: '',
+            city: '',
+            phone_number: '',
+            phone_number2: '',
+            birthday: null,
+            country_code: '+91',
+            country_iso_code: 'IN',
+            country_code2: '+91',
+            country_iso_code2: 'IN',
+            bonus: 0,
+            marketplace_pointer: '',
+            note: '',
+        },
+        validationSchema: Yup.object({
+            name: Yup.string().required('Name is required'),
+            phone_number: Yup.string().required('Phone is required'),
+            email: Yup.string().email('Invalid email').nullable(),
+        }),
+        onSubmit: async (values) => {
+            try {
+                setSaveLoading(true);
+                const endpoint = isEdit ? `api/v1/store/customer/outlet?id=${id}` : `api/v1/store/customer/outlet`;
+                const method = isEdit ? 'patch' : 'post';
 
-            if (payload) {
-                submitUser(payload);
-                // formik.resetForm();
+                const response = await apiFetcher[method](endpoint, values);
+
+                if (response.status === 200 || response.status === 201) {
+                    toast.success(isEdit ? 'Profile Updated' : 'Customer Created');
+                    if (!isEdit) navigate(`/customers/${response.data.data.id}/customerinformation`);
+                }
+            } catch (error) {
+                toast.error('Failed to save changes');
+            } finally {
+                setSaveLoading(false);
             }
         },
     });
 
-    const handleBlockCustomer = async () => {
-        try {
-            setBlockCustomerLoading(true);
-            setBlockCustomerModal(false);
+    const mapOptions = (array) => array.map((item) => ({ value: String(item), label: String(item) }));
 
-            const res = await BlockCustomerApi({
-                ...formik.values,
-                block_booking: !isBlocked,
-                id: customer?.id,
-            });
-
-            if (res.data.success) {
-                setIsBlocked(!isBlocked);
-                toast.success(
-                    isBlocked ? t('Customer.CustomerUnblockedSuccess') : t('Customer.CustomerBlockedSuccess'),
-                );
-                setInitialValues({
-                    ...formik.values,
-                    block_booking: !isBlocked,
-                });
-            } else {
-                toast.error(isBlocked ? t('Customer.CustomerUnblockedError') : t('Customer.CustomerBlockedError'));
-            }
-        } catch (error) {
-            console.error('Error blocking customer:', error);
-            toast.error(isBlocked ? t('Customer.CustomerUnblockError') : t('Customer.CustomerBlockError'));
-        } finally {
-            setBlockCustomerLoading(false);
-        }
-    };
-    const submitUser = async (payload) => {
-        let apiRequestMaker;
-        try {
-            setSaveLoading(true);
-            // First, delete the files that were removed locally
-            if (deletedFileIds.length > 0) {
-                try {
-                    await Promise.all(deletedFileIds.map((fileId) => apiFetcher.delete(`api/v1/store/file/${fileId}`)));
-                } catch (error) {
-                    console.error('Error deleting files:', error);
-                    toast.error(t('Customer.FileDeleteError'));
-                    return; // Stop the save process if file deletion fails
-                }
-            }
-
-            if (!isEdit) {
-                apiRequestMaker = await apiFetcher.post(`api/v1/store/customer/outlet`, payload);
-            } else {
-                if (!customer?.id) {
-                    toast.error(t('Customer.ToastCustomerIDError'));
-                    return;
-                }
-                apiRequestMaker = await apiFetcher.patch(`api/v1/store/customer/outlet?id=${customer?.id}`, payload);
-            }
-
-            const response = apiRequestMaker;
-
-            if (response.status === 201 || response.status === 200) {
-                toast.success(isEdit ? t('Customer.CustomerUpdateSuccess') : t('Customer.CustomerCreateSuccess'));
-                const ids = response.data.data.id;
-                setIsChanges(false);
-                setDeletedFileIds([]); // Reset deleted files tracking
-                setInitialValues(formik.values);
-                navigate(`/customers/${ids}/customerinformation`, { state: { data: customer } });
-            } else if (response.status === 400) {
-                toast.error(
-                    `${isEdit ? t('Customer.CustomerUpdateError') : t('Customer.CustomerCreateError')} - ${
-                        response?.data?.detail
-                    }`,
-                );
-            }
-        } catch (error) {
-            const errorMessage = error?.response?.data?.detail || error?.message || 'Unknown error';
-            toast.error(`Failed to ${isEdit ? 'update' : 'create'} customer - ${errorMessage}`);
-            console.error('Error creating customer:', errorMessage, error?.response || error);
-        } finally {
-            setSaveLoading(false);
-        }
+    const handleSelectDate = ({ date, type }) => {
+        setSelectedDate((prev) => ({ ...prev, [type]: date }));
     };
 
     const deleteCustomer = async (id) => {
         try {
-            const Deleted = await DeleteCustomerApi(id);
-            if (Deleted) {
-                toast.success(t('Customer.CustomerDeleteSuccess'));
-                const timeout = setTimeout(() => {
-                    navigate(`/customers`);
-                }, 800);
-                return () => clearTimeout(timeout);
+            const response = await DeleteCustomerApi(id);
+            if (response.status === 200) {
+                toast.success('Customer deleted successfully');
             }
         } catch (error) {
-            console.error('Error deleting customer:', error);
-            toast.error(t('Customer.CustomerDeleteError'));
+            toast.error('Failed to delete customer');
         }
     };
-
-    const handleCprChange = (e) => {
-        let input = e.target.value?.replace(/\D/g, '');
-        if (input.length > 10) {
-            input = input.slice(0, 10);
-        }
-        const formattedCpr = input.length > 6 ? `${input.slice(0, 6)}-${input.slice(6)}` : input;
-        formik.setFieldValue('cpr', formattedCpr);
-        if (formattedCpr.length === 11) {
-            formik.setFieldValue('cpr', formattedCpr);
-        }
-    };
-
-    useEffect(() => {
-        const phone1Len = CountryList[formik.values.country_iso_code || 'IN'];
-        const phone2Len = CountryList[formik.values.country_iso_code2 || 'IN'];
-
-        let phone1MinLength, phone1MaxLength, phone2MinLength, phone2MaxLength;
-
-        // Handle phone1 length
-        if (phone1Len?.minLength && phone1Len?.maxLength) {
-            phone1MinLength = phone1Len.minLength;
-            phone1MaxLength = phone1Len.maxLength;
-        } else if (phone1Len?.phoneLength) {
-            phone1MinLength = phone1Len.phoneLength;
-            phone1MaxLength = phone1Len.phoneLength;
-        }
-
-        // Handle phone2 length
-        if (phone2Len?.minLength && phone2Len?.maxLength) {
-            phone2MinLength = phone2Len.minLength;
-            phone2MaxLength = phone2Len.maxLength;
-        } else if (phone2Len?.phoneLength) {
-            phone2MinLength = phone2Len.phoneLength;
-            phone2MaxLength = phone2Len.phoneLength;
-        }
-
-        setPhoneLength({
-            phone1: { minLength: phone1MinLength, maxLength: phone1MaxLength },
-            phone2: { minLength: phone2MinLength, maxLength: phone2MaxLength },
-        });
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [formik.values.country_iso_code, formik.values.country_iso_code2]);
-
-    useEffect(() => {
-        // Debounce the changes check
-        const timeoutId = setTimeout(() => {
-            if (formik.dirty) {
-                setIsChanges(true);
-            } else {
-                setIsChanges(false);
-            }
-        }, 100);
-
-        return () => clearTimeout(timeoutId);
-    }, [formik.dirty]);
-
-    const handleFileUpload = async (event) => {
-        const files = Array.from(event.target.files);
-        const maxSize = 30 * 1024 * 1024; // 15MB in bytes
-        const validFiles = [];
-        const invalidFiles = [];
-
-        if (files.length > 3) {
-            toast.error(t('Customer.FileLimit'));
-            return;
-        }
-
-        files.forEach((file) => {
-            if (file.size > maxSize) {
-                invalidFiles.push(file.name);
-            } else {
-                validFiles.push(file);
-            }
-        });
-
-        if (invalidFiles.length > 0) {
-            toast.error(`${t('Customer.FileSize')}: ${invalidFiles.join(', ')}`);
-            return;
-        }
-        if (validFiles.length > 0) {
-            const fileArray = Array.from(validFiles);
-            let uploadedCount = 0;
-            const toastId = toast.loading(`${t('Common.Uploading')} 0/${fileArray.length}...`);
-
-            const uploadNext = (index) => {
-                if (index >= fileArray.length) {
-                    toast.update(toastId, {
-                        render: `${t('Common.Uploading')} ${uploadedCount}/${fileArray.length} (100%)`,
-                        isLoading: false,
-                        type: 'success',
-                        autoClose: 1500,
-                    });
-                    return;
-                }
-
-                const file = fileArray[index];
-                const payload = new FormData();
-                payload.append('file', file);
-
-                // Reset progress to 0% at start of each upload
-                toast.update(toastId, {
-                    render: `${t('Common.Uploading')} ${index + 1}/${fileArray.length} (0%)`,
-                    isLoading: true,
-                });
-
-                apiFetcher
-                    .post(`api/v1/store/file`, payload, {
-                        onUploadProgress: (progressEvent) => {
-                            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                            toast.update(toastId, {
-                                render: `${t('Common.Uploading')} ${index + 1}/${
-                                    fileArray.length
-                                } (${percentCompleted}%)`,
-                                isLoading: true,
-                            });
-                        },
-                    })
-                    .then((response) => {
-                        if (response.status === HttpStatusCode.Created || response.status === HttpStatusCode.Ok) {
-                            const newFile = {
-                                id: response?.data?.data?.id,
-                                file_name: response?.data?.data?.file_name,
-                                url: response?.data?.data?.url,
-                                denmark_created_at: moment(response?.data?.data?.denmark_created_at).format(
-                                    'YYYY-MM-DD HH:mm:ss',
-                                ),
-                            };
-                            setUploadedFiles((prevFiles) => [...prevFiles, newFile]);
-                            uploadedCount++;
-                            uploadNext(index + 1);
-                        } else {
-                            toast.update(toastId, {
-                                render: `${t('Common.Uploading')} ${index + 1}/${fileArray.length} (Failed)`,
-                                isLoading: false,
-                                type: 'error',
-                                autoClose: 1500,
-                            });
-                        }
-                    })
-                    .catch((error) => {
-                        toast.update(toastId, {
-                            render: `${t('Common.Uploading')} ${index + 1}/${fileArray.length} (Failed)`,
-                            isLoading: false,
-                            type: 'error',
-                            autoClose: 1500,
-                        });
-                    });
-            };
-
-            uploadNext(0); // Start the chain
-        }
-    };
-
-    const handleRemoveFile = async (fileId) => {
-        // Add fileId to deletedFileIds array
-        setDeletedFileIds((prev) => [...prev, fileId]);
-
-        // Optimistically remove file from state
-        setUploadedFiles((prev) => prev.filter((file) => file.id !== fileId));
-        const currentAttachments = formik.values.attachments || [];
-        formik.setFieldValue(
-            'attachments',
-            currentAttachments.filter((id) => id !== fileId),
-        );
-
-        // Set changes to true to enable save button
-        setIsChanges(true);
-    };
-
-    useEffect(() => {
-        if (uploadedFiles) {
-            formik.setFieldValue(
-                'attachments',
-                uploadedFiles.map((f) => f.id),
-            );
-        }
-    }, [uploadedFiles]);
 
     return (
-        <Stack sx={{ display: 'flex', flexDirection: 'column' }}>
-            {/* {!loading && */}
-            {/* <Stack display={"flex"} flexDirection={'row'} gap={2} alignItems={'center'} justifyContent={'flex-end'}>
-
-               
-
-            </Stack> */}
-            {isChanges && formik.dirty && (
-                <AppBar
-                    sx={{
-                        position: 'fixed',
-                        zIndex: 2,
-                        top: isEdit ? 125 : 45,
-                        left: 0,
-                        right: 0,
-                        py: 1,
-                        px: isMobile ? 2 : 4,
-                        height: 50,
-                        bgcolor: '#fff',
-                        display: 'flex',
-                        alignItems: 'flex-end',
-                        width: '100%',
-                        borderWidth: 0,
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    }}
-                >
-                    {isEdit
-                        ? (user?.settings?.edit_customers || user?.role === 'ADMIN') && (
-                              <Box sx={{ borderRadius: 50, py: 1 }}>
-                                  <RadixButton
-                                      type="button"
-                                      variant="primary"
-                                      onClick={() => formik.handleSubmit()}
-                                      disabled={saveLoading}
-                                      className="rounded-full"
-                                  >
-                                      {saveLoading ? (
-                                          <CircularProgress size={20} sx={{ color: 'inherit' }} />
-                                      ) : (
-                                          t('Customer.SaveCh')
-                                      )}
-                                  </RadixButton>
-                              </Box>
-                          )
-                        : (user?.settings?.create_customers || user?.role === 'ADMIN') && (
-                              <Box sx={{ borderRadius: 50, py: 1 }}>
-                                  <RadixButton
-                                      type="button"
-                                      variant="primary"
-                                      onClick={() => formik.handleSubmit()}
-                                      disabled={saveLoading}
-                                      className="rounded-full"
-                                  >
-                                      {saveLoading ? (
-                                          <CircularProgress size={20} sx={{ color: 'inherit' }} />
-                                      ) : (
-                                          t('Customer.AddCust')
-                                      )}
-                                  </RadixButton>
-                              </Box>
-                          )}
-                </AppBar>
-            )}
-
-            <Stack
-                spacing={1}
+        <Stack sx={{ bgcolor: theme.colors.background.default }}>
+            {/* MAIN FORM CARD */}
+            <Box
                 sx={{
                     mx: { xs: 2, md: 10 },
-                    bgcolor: '#fff',
-                    borderRadius: '25px',
-                    py: { xs: 2, md: 6 },
-                    px: { xs: 2, md: 18 },
-                    mt: isChanges ? 8 : 4,
-                    position: 'relative',
-                    zIndex: 1,
+                    mt: 4,
+                    p: { xs: 3, md: 8 },
+                    bgcolor: theme.colors.background.paper,
+                    borderRadius: '40px',
+                    boxShadow: '0 20px 60px -10px rgba(0,0,0,0.05)',
+                    border: `1px solid ${theme.colors.grey[100]}`,
                 }}
             >
-                <Typography sx={{ color: '#545454', fontSize: '22px' }} variant="h6">
-                    {t('Customer.CustomerInformation')}
-                </Typography>
+                <Stack spacing={1} sx={{ mb: 6 }}>
+                    <Typography
+                        variant="h2"
+                        sx={{
+                            fontWeight: 900,
+                            fontSize: '32px',
+                            color: theme.colors.grey[950],
+                            letterSpacing: '-1.5px',
+                        }}
+                    >
+                        {isEdit ? 'Customer Profile' : 'Register Customer'}
+                    </Typography>
+                    <Typography sx={{ color: theme.colors.grey[500], fontWeight: 500 }}>
+                        Manage personal details, contact information, and internal notes.
+                    </Typography>
+                </Stack>
 
-                <form
-                    style={{ width: '100%' }}
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                    }}
-                >
-                    <Grid2 container spacing={2} columnSpacing={20} marginTop={{ xs: 1, sm: 5 }} paddingBottom={2}>
-                        <Grid2 sx={{ display: 'flex', flexDirection: 'column', gap: 3 }} item size={{ xs: 12, md: 6 }}>
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('Customer.CustomerName')}
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <Box sx={{ mt: 1, width: '100%' }}>
-                                            <RadixInput
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                name="name"
-                                                placeholder={t('Customer.CustomerName')}
-                                                value={formik.values.name}
-                                                onChange={formik.handleChange}
-                                                startComponent={
-                                                    isBlocked ? (
-                                                        <Typography sx={{ color: '#1f1f1f' }} component="span">
-                                                            🚫
-                                                        </Typography>
-                                                    ) : undefined
-                                                }
-                                            />
-                                        </Box>
-                                        {formik.touched.name && formik.errors.name && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.name}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
+                <Grid2 container spacing={8}>
+                    {/* LEFT COLUMN: IDENTIFICATION */}
+                    <Grid2 size={{ xs: 12, md: 6 }}>
+                        <Stack spacing={4}>
+                            <SectionHeader icon={<UserRound size={20} />} title="Identity" />
 
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('Common.Email')}
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <Box sx={{ mt: 1, width: '100%' }}>
-                                            <RadixInput
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                name="email"
-                                                placeholder={t('Common.Email')}
-                                                value={formik.values.email}
-                                                onChange={formik.handleChange}
-                                            />
-                                        </Box>
-                                        {formik.touched.email && formik.errors.email && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.email}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
+                            <FieldWrapper label="FULL NAME" error={formik.touched.name && formik.errors.name}>
+                                <RadixInput
+                                    name="name"
+                                    value={formik.values.name}
+                                    onChange={formik.handleChange}
+                                    placeholder="e.g. John Doe"
+                                    disabled={!havePermission}
+                                />
+                            </FieldWrapper>
 
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('Common.Phone')}
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <RadixPhoneField
-                                            value={{
-                                                phone: formik.values.phone_number,
-                                                country_code: formik.values.country_code,
-                                                countryISOCode: formik.values.country_iso_code || 'IN',
-                                            }}
-                                            onBlur={() => formik.setFieldTouched('phone_number', true)}
-                                            onChange={(pv) => formik.setFieldValue('phone_number', pv.phone)}
-                                            onCountryChange={(code, iso) => {
-                                                formik.setFieldValue('country_code', code);
-                                                formik.setFieldValue('country_iso_code', iso);
-                                            }}
-                                            disabled={isEdit && !havePermission}
+                            <FieldWrapper label="EMAIL ADDRESS" error={formik.touched.email && formik.errors.email}>
+                                <RadixInput
+                                    name="email"
+                                    value={formik.values.email}
+                                    onChange={formik.handleChange}
+                                    placeholder="john@example.com"
+                                />
+                            </FieldWrapper>
+
+                            <FieldWrapper label="PRIMARY CONTACT">
+                                <RadixPhoneField
+                                    value={{
+                                        phone: formik.values.phone_number,
+                                        country_code: formik.values.country_code,
+                                        countryISOCode: formik.values.country_iso_code || 'IN',
+                                    }}
+                                    onChange={(pv) => {
+                                        formik.setFieldValue('phone_number', pv.phone);
+                                        formik.setFieldValue('country_code', pv.country_code);
+                                        formik.setFieldValue('country_iso_code', pv.countryISOCode);
+                                    }}
+                                />
+                            </FieldWrapper>
+
+                            <FieldWrapper label="BIRTHDAY">
+                                <Stack direction="row" spacing={1.5}>
+                                    <Box flex={1}>
+                                        <RadixSelect
+                                            placeholder="DD"
+                                            options={mapOptions(dateObject.dates)}
+                                            value={String(selectedDate.day)}
+                                            onValueChange={(v) => handleSelectDate({ date: Number(v), type: 'day' })}
                                         />
-                                        {formik.touched.phone_number && formik.errors.phone_number && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.phone_number}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('Common.AlternativePhoneNumber')} ({t('Common.Optional')})
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <RadixPhoneField
-                                            value={{
-                                                phone: formik.values.phone_number2,
-                                                country_code: formik.values.country_code2,
-                                                countryISOCode: formik.values.country_iso_code2 || 'IN',
-                                            }}
-                                            onBlur={() => formik.setFieldTouched('phone_number2', true)}
-                                            onChange={(pv) => formik.setFieldValue('phone_number2', pv.phone)}
-                                            onCountryChange={(code, iso) => {
-                                                formik.setFieldValue('country_code2', code);
-                                                formik.setFieldValue('country_iso_code2', iso);
-                                            }}
-                                            disabled={isEdit && !havePermission}
+                                    </Box>
+                                    <Box flex={1}>
+                                        <RadixSelect
+                                            placeholder="MM"
+                                            options={mapOptions(dateObject.months)}
+                                            value={String(selectedDate.month)}
+                                            onValueChange={(v) => handleSelectDate({ date: Number(v), type: 'month' })}
                                         />
-                                        {formik.touched.phone_number2 && formik.errors.phone_number2 && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.phone_number2}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('Common.Birthday')}{' '}
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <Stack width={'100%'} gap={2} alignItems={'center'} flexDirection={'row'}>
-                                            <Box sx={{ width: '30%' }}>
-                                                <RadixSelect
-                                                    disabled={isEdit && !havePermission}
-                                                    value={selectedDate.day ? String(selectedDate.day) : undefined}
-                                                    placeholder="DD"
-                                                    onValueChange={(v) =>
-                                                        handleSelectDate({ date: Number(v), type: 'day' })
-                                                    }
-                                                    options={mapOptions(dateObject.dates).map((o) => ({
-                                                        label: String(o.label),
-                                                        value: String(o.value),
-                                                        disabled: o.disabled,
-                                                    }))}
-                                                />
-                                            </Box>
-
-                                            <Box sx={{ width: '30%' }}>
-                                                <RadixSelect
-                                                    disabled={isEdit && !havePermission}
-                                                    value={selectedDate.month ? String(selectedDate.month) : undefined}
-                                                    placeholder="MM"
-                                                    onValueChange={(v) =>
-                                                        handleSelectDate({ date: Number(v), type: 'month' })
-                                                    }
-                                                    options={mapOptions(dateObject.months, getDisabledMonths()).map(
-                                                        (o) => ({
-                                                            label: String(o.label),
-                                                            value: String(o.value),
-                                                            disabled: o.disabled,
-                                                        }),
-                                                    )}
-                                                />
-                                            </Box>
-
-                                            <Box sx={{ width: '40%' }}>
-                                                <RadixSelect
-                                                    disabled={isEdit && !havePermission}
-                                                    value={selectedDate.year ? String(selectedDate.year) : undefined}
-                                                    placeholder="YYYY"
-                                                    onValueChange={(v) =>
-                                                        handleSelectDate({ date: Number(v), type: 'year' })
-                                                    }
-                                                    options={mapOptions(dateObject.years, getDisabledYears()).map(
-                                                        (o) => ({
-                                                            label: String(o.label),
-                                                            value: String(o.value),
-                                                            disabled: o.disabled,
-                                                        }),
-                                                    )}
-                                                />
-                                            </Box>
-                                        </Stack>
-
-                                        {formik.touched.birthday && formik.errors.birthday && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.birthday}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {' '}
-                                    {t('Common.CPRNumber')}
-                                    <Tooltip placement="right" couser title={t('Customer.CprHoverMsg')}>
-                                        <img
-                                            style={{ marginLeft: 5 }}
-                                            src={LockIcon}
-                                            alt="lock"
-                                            height={'15px'}
-                                            width={'15px'}
-                                        />
-                                    </Tooltip>
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Box sx={{ width: '100%' }}>
-                                        <RadixInput
-                                            disabled={isEdit && !havePermission}
-                                            id="cpr"
-                                            name="cpr"
-                                            value={formik.values.cpr}
-                                            onChange={handleCprChange}
-                                            onBlur={formik.handleBlur}
-                                            placeholder="000000-XXXX"
-                                            maxLength={11}
-                                            className="text-base placeholder:text-[#747474]"
+                                    </Box>
+                                    <Box flex={1.5}>
+                                        <RadixSelect
+                                            placeholder="YYYY"
+                                            options={mapOptions(dateObject.years)}
+                                            value={String(selectedDate.year)}
+                                            onValueChange={(v) => handleSelectDate({ date: Number(v), type: 'year' })}
                                         />
                                     </Box>
                                 </Stack>
-                                <div style={{ zIndex: 50 }}>
-                                    {formik.touched.cpr && formik.errors.cpr && (
-                                        <Typography variant="caption" color="red">
-                                            {formik.errors.cpr}
-                                        </Typography>
-                                    )}
-                                </div>
-                            </Stack>
-
-                            <Stack>
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('POS.Bonus')}
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <Box sx={{ mt: 1, width: '100%' }}>
-                                            <RadixInput
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                name="bonus"
-                                                placeholder={t('POS.Bonus')}
-                                                value={formik.values.bonus}
-                                                onChange={(e) => {
-                                                    const input = formatPrice(e.target.value);
-                                                    formik.setFieldValue('bonus', input);
-                                                }}
-                                            />
-                                        </Box>
-                                        {formik.touched.bonus && formik.errors.bonus && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.bonus}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-                        </Grid2>
-
-                        <Grid2 sx={{ display: 'flex', flexDirection: 'column', gap: 3 }} item size={{ xs: 12, md: 6 }}>
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('Common.Address')}
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <Box sx={{ mt: 1, width: '100%' }}>
-                                            <RadixInput
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                name="address"
-                                                placeholder={t('Common.Address')}
-                                                value={formik.values.address}
-                                                onChange={formik.handleChange}
-                                            />
-                                        </Box>
-                                        {formik.touched.address && formik.errors.address && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.address}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-
-                            <Stack
-                                sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}
-                                item
-                                size={6}
-                            >
-                                <Stack
-                                    sx={{
-                                        width: '40%',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'flex-start',
-                                        justifyContent: 'flex-start',
-                                    }}
-                                >
-                                    <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                        {t('Common.ZipCode')}
-                                    </Typography>
-                                    <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                        <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                            <Box sx={{ mt: 1, width: '100%' }}>
-                                                <RadixInput
-                                                    disabled={isEdit && !havePermission}
-                                                    onBlur={formik.handleBlur}
-                                                    name="zip_code"
-                                                    placeholder={t('Common.ZipCode')}
-                                                    value={formik.values.zip_code}
-                                                    onChange={formik.handleChange}
-                                                />
-                                            </Box>
-                                            {formik.touched.zip_code && formik.errors.zip_code && (
-                                                <Typography variant="caption" color="red">
-                                                    {formik.errors.zip_code}
-                                                </Typography>
-                                            )}
-                                        </Stack>
-                                    </Stack>
-                                </Stack>
-
-                                <Stack
-                                    sx={{
-                                        width: '60%',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'flex-start',
-                                        justifyContent: 'flex-start',
-                                    }}
-                                >
-                                    <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                        {t('Common.City')}
-                                    </Typography>
-                                    <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                        <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                            <Box sx={{ mt: 1, width: '100%' }}>
-                                                <RadixInput
-                                                    disabled={isEdit && !havePermission}
-                                                    onBlur={formik.handleBlur}
-                                                    name="city"
-                                                    placeholder={t('Common.City')}
-                                                    value={formik.values.city}
-                                                    onChange={formik.handleChange}
-                                                />
-                                            </Box>
-                                            {formik.touched.city && formik.errors.city && (
-                                                <Typography variant="caption" color="red">
-                                                    {formik.errors.city}
-                                                </Typography>
-                                            )}
-                                        </Stack>
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('Customer.CustomerNotes')}
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <Box sx={{ width: '100%' }}>
-                                            <RadixTextarea
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.marketplace_pointer}
-                                                placeholder={t('Customer.CustomerNotes')}
-                                                onChange={formik.handleChange}
-                                                name="marketplace_pointer"
-                                                rows={5}
-                                            />
-                                        </Box>
-
-                                        {formik.touched.marketplace_pointer && formik.errors.marketplace_pointer && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.marketplace_pointer}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-
-                            <Stack
-                                sx={{
-                                    width: 'full',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    justifyContent: 'flex-start',
-                                }}
-                            >
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    Note
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <Box sx={{ width: '100%' }}>
-                                            <RadixTextarea
-                                                disabled={isEdit && !havePermission}
-                                                onBlur={formik.handleBlur}
-                                                value={formik.values.note}
-                                                placeholder="Note"
-                                                onChange={formik.handleChange}
-                                                name="note"
-                                                rows={5}
-                                            />
-                                        </Box>
-
-                                        {formik.touched.note && formik.errors.note && (
-                                            <Typography variant="caption" color="red">
-                                                {formik.errors.note}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-
-                            <Stack>
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f' }}>
-                                    {t('Customer.MarketingPermission')}
-                                </Typography>
-                                <Stack width={'100%'} flexDirection={'row'} sx={{ alignItems: 'center' }}>
-                                    <Stack flex={1} flexDirection={'column'} justifyContent={'center'}>
-                                        <RadixSwitch
-                                            checked={formik.values.marketing_permission}
-                                            onChange={(checked) =>
-                                                formik.setFieldValue('marketing_permission', checked)
-                                            }
-                                            name="marketing_permission"
-                                            label={t('Customer.SendMarketingEmailsAndSMS')}
-                                        />
-                                    </Stack>
-                                </Stack>
-                            </Stack>
-                        </Grid2>
+                            </FieldWrapper>
+                        </Stack>
                     </Grid2>
-                </form>
 
-                <Stack sx={{ mt: 4 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 700, color: '#1f1f1f', mb: 2 }}>
-                        {t('Customer.UploadImageText')}
-                    </Typography>
-                    <Button
-                        variant="outlined"
-                        component="label"
-                        sx={{
-                            width: '200px',
-                            mb: 2,
-                            gap: 2,
-                            borderRadius: 3,
-                            textTransform: 'none',
-                            borderColor: '#D9D9D9',
-                            color: '#1f1f1f',
-                            '&:hover': {
-                                backgroundColor: 'rgba(31, 31, 31, 0.04)',
-                            },
-                        }}
-                    >
-                        <img src={Upload} alt="upload" style={{ height: '20px', width: '20px' }} />
-                        {t('Customer.ChsFiles')}
-                        <input type="file" multiple hidden accept="*/*" onChange={handleFileUpload} />
-                    </Button>
+                    {/* RIGHT COLUMN: LOCATION & NOTES */}
+                    <Grid2 size={{ xs: 12, md: 6 }}>
+                        <Stack spacing={4}>
+                            <SectionHeader icon={<MapPin size={20} />} title="Location & Loyalty" />
 
-                    {uploadedFiles.length > 0 && (
-                        <AttachmentsList uploadedFiles={uploadedFiles} handleRemoveFile={handleRemoveFile} />
-                    )}
-                </Stack>
+                            <FieldWrapper label="RESIDENTIAL ADDRESS">
+                                <RadixInput
+                                    name="address"
+                                    value={formik.values.address}
+                                    onChange={formik.handleChange}
+                                    placeholder="House no, Street name"
+                                />
+                            </FieldWrapper>
 
-                <CustomerCards loading={loading} customerSaleDetails={customerSaleDetails} />
-                {/* </Formik> */}
-            </Stack>
-            {isEdit && (user?.settings?.delete_customers || user?.role === 'ADMIN') && (
-                <Stack
-                    sx={{
-                        justifyContent: { xs: 'center', md: 'flex-end' },
-                        alignItems: 'center',
-                        flexDirection: { xs: 'column', md: 'row' },
-                        gap: 2,
-                        px: { xs: 2, md: 10 },
-                        mt: 2,
-                        width: '100%',
-                    }}
+                            <Stack direction="row" spacing={2}>
+                                <Box flex={2}>
+                                    <FieldWrapper label="CITY">
+                                        <RadixInput
+                                            name="city"
+                                            value={formik.values.city}
+                                            onChange={formik.handleChange}
+                                            placeholder="City"
+                                        />
+                                    </FieldWrapper>
+                                </Box>
+                                <Box flex={1}>
+                                    <FieldWrapper label="ZIP">
+                                        <RadixInput
+                                            name="zip_code"
+                                            value={formik.values.zip_code}
+                                            onChange={formik.handleChange}
+                                            placeholder="Zip"
+                                        />
+                                    </FieldWrapper>
+                                </Box>
+                            </Stack>
+
+                            <FieldWrapper label="LOYALTY BONUS (₹)">
+                                <RadixInput
+                                    name="bonus"
+                                    value={formik.values.bonus}
+                                    onChange={(e) => formik.setFieldValue('bonus', formatPrice(e.target.value))}
+                                    placeholder="0.00"
+                                />
+                            </FieldWrapper>
+
+                            <SectionHeader icon={<NotebookPen size={20} />} title="System Notes" />
+
+                            <FieldWrapper label="INTERNAL REMARKS">
+                                <RadixTextarea
+                                    name="note"
+                                    rows={4}
+                                    value={formik.values.note}
+                                    onChange={formik.handleChange}
+                                    placeholder="Add private staff notes about this customer..."
+                                />
+                            </FieldWrapper>
+                        </Stack>
+                    </Grid2>
+                </Grid2>
+            </Box>
+            {/* DELETE ACTION */}
+            <Box sx={{ mx: { xs: 2, md: 10 }, mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                <RadixButton
+                    variant="primary"
+                    onClick={() => formik.handleSubmit()}
+                    disabled={saveLoading}
+                    className="w-fit"
                 >
-                    {/* Delete Customer Button */}
-                    <Box sx={{ width: { xs: '100%', md: 180 }, py: 1 }}>
-                        <RadixButton
-                            type="button"
-                            variant="danger"
-                            onClick={() => setDeleteCustomerModel(true)}
-                            disabled={customer?.id === 'create'}
-                            className="rounded-full w-full"
-                        >
-                            <Typography noWrap fontWeight={700}>
-                                {t('Customer.DelCust')}
-                            </Typography>
-                        </RadixButton>
-                    </Box>
-
-                    <Box sx={{ width: { xs: '100%', md: 180 }, py: 1 }}>
-                        <RadixButton
-                            type="button"
-                            variant="primary"
-                            onClick={() => setBlockCustomerModal(true)}
-                            disabled={customer?.id === 'create'}
-                            className="rounded-full w-full !bg-[#e19957] !border-[#e19957] hover:!bg-[#c98445]"
-                        >
-                            <Typography noWrap fontWeight={700}>
-                                {isBlocked ? t('Customer.UnblockCustomer') : t('Customer.BlockCustomer')}
-                            </Typography>
-                        </RadixButton>
-                    </Box>
-                </Stack>
-            )}
-
-            {deleteCustomerModel && (
-                <CustomDeleteModal
-                    open={deleteCustomerModel}
-                    handleClose={() => setDeleteCustomerModel(false)}
-                    title={t('Common.Delete')}
-                    description={
-                        <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-                            {t('Customer.DeleteMsg')}
-                        </Typography>
-                    }
-                    onClickDismiss={() => setDeleteCustomerModel(false)}
-                    onClickConfirm={() => deleteCustomer(customer?.id)}
-                />
-            )}
-
-            {blockCustomerModal && (
-                <CustomDeleteModal
-                    open={blockCustomerModal}
-                    handleClose={() => setBlockCustomerModal(false)}
-                    title={isBlocked ? t('Customer.UnblockCustomer') : t('Customer.BlockCustomer')}
-                    description={
-                        <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-                            {isBlocked ? t('Customer.UnblockCustomerDesc') : t('Customer.BlockCustomerDesc')}
-                        </Typography>
-                    }
-                    onClickDismiss={() => setBlockCustomerModal(false)}
-                    onClickConfirm={() => {
-                        handleBlockCustomer();
-                    }}
-                    confirmTitle={t('Customer.ButtonTitleYes')}
-                    dismissTitle={t('Customer.ButtonTitleNo')}
-                    loading={BlockCustomerLoading}
-                />
-            )}
+                    {saveLoading ? <CircularProgress size={20} color="inherit" /> : 'Save Profile'}
+                </RadixButton>
+                {isEdit && havePermission && (
+                    <RadixButton
+                        variant="danger"
+                        onClick={() => setDeleteCustomerModel(true)}
+                        className="rounded-full"
+                        style={{ px: 5, py: 1 }}
+                    >
+                        Delete Customer Profile
+                    </RadixButton>
+                )}
+            </Box>
+            <CustomDeleteModal
+                open={deleteCustomerModel}
+                handleClose={() => setDeleteCustomerModel(false)}
+                title="Delete Customer Profile?"
+                description="This will permanently remove the customer profile. Previous transaction history will be detached but kept for accounting."
+                onClickConfirm={() => deleteCustomer(id)}
+            />
         </Stack>
     );
 };
+
+// HELPER COMPONENTS FOR CLEANER CODE
+const SectionHeader = ({ icon, title }) => (
+    <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
+        <Box sx={{ color: theme.colors.primary[500], display: 'flex' }}>{icon}</Box>
+        <Typography
+            sx={{
+                fontWeight: 800,
+                fontSize: '14px',
+                color: theme.colors.grey[900],
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+            }}
+        >
+            {title}
+        </Typography>
+    </Stack>
+);
+
+const FieldWrapper = ({ label, children, error }) => (
+    <Stack spacing={1} sx={{ width: '100%' }}>
+        <Typography sx={{ fontSize: '12px', fontWeight: 700, color: theme.colors.grey[600], ml: 1 }}>
+            {label}
+        </Typography>
+        {children}
+        {error && (
+            <Typography sx={{ fontSize: '12px', color: theme.colors.red[500], ml: 1, fontWeight: 600 }}>
+                {error}
+            </Typography>
+        )}
+    </Stack>
+);
+
 export default CustomerInformation;
