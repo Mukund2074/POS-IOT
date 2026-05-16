@@ -53,8 +53,9 @@ function App() {
             const isAppFromURL = params.get('from_app') === 'true';
             const isDoctor = employee_role === 'DOCTOR';
 
-            // Check if current path is a public booking route
-            const isPublicBookingRoute = location.pathname.startsWith('/booking/');
+            const isPublicRoute =
+                location.pathname.startsWith('/booking/') ||
+                location.pathname.startsWith('/admin-login');
 
             if (auth_token) {
                 localStorage.setItem('auth_token', auth_token);
@@ -88,12 +89,14 @@ function App() {
                     }
                 }
                 // navigate("/calendar")
-            } else if (!auth_token && !auth2 && !isPublicBookingRoute) {
+            } else if (!auth_token && !auth2 && !isPublicRoute) {
                 navigate('/');
             }
         } catch (error) {
-            // Don't redirect to login if on public booking route
-            if (!location.pathname.startsWith('/booking/')) {
+            if (
+                !location.pathname.startsWith('/booking/') &&
+                !location.pathname.startsWith('/admin-login')
+            ) {
                 navigate('/');
             }
         } finally {

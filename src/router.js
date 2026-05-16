@@ -60,7 +60,6 @@ import AdminPage from './scenes/Admin/Admin.index';
 import AdminDashboard from './scenes/Admin/Dashboard/AdminDashboard.index';
 import AdminLoginPage from './scenes/Admin/Login/AdminLogin.index';
 
-
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -77,14 +76,16 @@ export const router = createBrowserRouter([
             {
                 path: 'admin',
                 element: <ProtectedRoute element={<AdminDashboard />} />,
-            },
-            {
-                path: 'admin/create',
-                element: <ProtectedRoute element={<AdminPage />} />,
-            },
-            {
-                path: 'admin/edit/:id',
-                element: <ProtectedRoute element={<AdminPage />} />,
+                children: [
+                    {
+                        path: 'create',
+                        element: <ProtectedRoute element={<AdminPage />} />,
+                    },
+                    {
+                        path: 'edit/:id',
+                        element: <ProtectedRoute element={<AdminPage />} />,
+                    },
+                ],
             },
             {
                 path: 'unauthorized',
