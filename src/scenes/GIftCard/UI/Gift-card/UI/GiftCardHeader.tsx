@@ -7,9 +7,7 @@ import { t } from 'i18next';
 import { GiftCardHeaderProps } from '../Types/GiftCard.types';
 import { useNavigate } from 'react-router-dom';
 import Permission from '@/utils/POS/Permission';
-import React, { useState } from 'react';
-import { Print } from '@mui/icons-material';
-import ExportGiftCard from '../../shared/Modals/ExportGiftCard';
+import React from 'react';
 
 const giftCardObjectForSelection = [
     { value: 'ALL', label: 'All gift cards' },
@@ -26,7 +24,6 @@ const GiftCardHeader = ({
     setSelectedSources,
     selectedSources,
 }: GiftCardHeaderProps) => {
-    const [exportModal, setExportModal] = useState(false);
     const navigate = useNavigate();
     const { isAllowed } = Permission();
     const sources = [
@@ -110,38 +107,6 @@ const GiftCardHeader = ({
                 </Stack>
             </Stack>
 
-            {isAllowed('GiftCard', 'read') && (
-                <POSButton
-                    title={
-                        <Stack
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                gap: 1,
-                            }}
-                        >
-                            <Print />
-                            {t('GiftCard.ExportGiftCards')}
-                        </Stack>
-                    }
-                    variant="save"
-                    width={{ xs: '100%', md: 'auto' }}
-                    sx={{ ml: 'auto', mb: 2 }}
-                    onClick={() => {
-                        setExportModal(true);
-                        // setShowPrintModal(true);
-                    }}
-                />
-            )}
-
-            {exportModal && (
-                <ExportGiftCard
-                    open={exportModal}
-                    onClose={() => setExportModal(false)}
-                    giftCardFilters={giftCardObjectForSelection}
-                />
-            )}
         </Stack>
     );
 };

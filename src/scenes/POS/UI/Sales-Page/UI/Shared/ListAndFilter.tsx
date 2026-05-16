@@ -15,7 +15,6 @@ import type {
 } from '@/shared/api/models';
 import Permission, { PermissionDenied } from '@/utils/POS/Permission';
 import POSInput from '@/components/POS/Common/POSInput';
-import { Print } from '@mui/icons-material';
 import SalesPrintFilters from '../List/Modals/SalesPrintFilters';
 import { POSDateRangePicker } from '@/components/POS/Common/POSDateRangePicker';
 import moment, { Moment } from 'moment';
@@ -155,29 +154,7 @@ export default function ListAndFilter({
                     )}
                 </Stack>
             </Stack>
-            {isAllowed('Sales', 'read') && (
-                <POSButton
-                    title={
-                        <Stack
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                gap: 1,
-                            }}
-                        >
-                            <Print />
-                            {t('POS.ExportSales')}
-                        </Stack>
-                    }
-                    variant="save"
-                    width={{ xs: '100%', md: 'auto' }}
-                    sx={{ ml: 'auto', mb: 2 }}
-                    onClick={() => {
-                        setShowPrintModal(true);
-                    }}
-                />
-            )}
+          
 
             {isAllowed('Sales', 'read') ? (
                 <InfiniteScroll

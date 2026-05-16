@@ -194,41 +194,7 @@ export default function SalesPrintFilters({
                         />
                     </Stack>
                 </Stack>
-                <POSButton
-                    title={
-                        loading ? (
-                            <Stack
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                }}
-                            >
-                                <CircularProgress size={20} sx={{ color: 'inherit' }} />
-                                {t('POS.Processing')}
-                            </Stack>
-                        ) : (
-                            <Stack
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                }}
-                            >
-                                <Print />
-                                {t('POS.ExportSales')}
-                            </Stack>
-                        )
-                    }
-                    variant="save"
-                    sx={{ ml: 'auto', mt: 3 }}
-                    width={{ xs: '100%', md: 'auto' }}
-                    onClick={() => {
-                        formik.handleSubmit();
-                    }}
-                />
+            
             </Paper>
         </Modal>
     );

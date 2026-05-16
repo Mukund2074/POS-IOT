@@ -15,9 +15,6 @@ export default function POSLayout() {
         { id: 3, title: t('POS.Suppliers'), link: '/pos/suppliers' },
         { id: 4, title: t('POS.Product'), link: '/pos/products' },
         { id: 5, title: t('POS.Expense'), link: '/pos/expenses' },
-        { id: 7, title: t('Report.Report'), link: '/pos/report' },
-        // { id: 6, title: t('GiftCard.Settings'), link: '/pos/settings' },
-        // { id: 7, title: t('POS.Integration'), link: '/pos/integration' },
     ];
 
     if (user?.role === 'ADMIN') {
@@ -44,8 +41,6 @@ export default function POSLayout() {
             setSelectedTab(5);
         } else if (location.pathname.startsWith('/pos/settings')) {
             setSelectedTab(6);
-        } else if (location.pathname.startsWith('/pos/report')) {
-            setSelectedTab(7);
         } else {
             setSelectedTab(4);
         }

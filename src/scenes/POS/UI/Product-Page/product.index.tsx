@@ -1,7 +1,7 @@
 import { Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { t } from 'i18next';
-import { Menu, Print } from '@mui/icons-material';
+import { Menu,  } from '@mui/icons-material';
 import CreateCategory from './UI/Modals/CreateCategory';
 import POSProductList from './UI/List/POSProductList';
 import { productHandler } from './Core/product.handler';
@@ -25,7 +25,6 @@ import { useCreateProductCategory, useDeleteProductCategory, useUpdateProductCat
 import { useDeleteProducts, useUpdateProducts } from '@/hooks/api/pos/products/useProducts';
 import POSProductMultiEdit from './UI/Modals/EditMultiProductForm';
 import Permission from '@/utils/POS/Permission';
-import ExportProducts from './UI/Modals/ExportProducts';
 
 export default function POSProducts() {
     const [boolState, setBoolState] = useState<{
@@ -200,29 +199,7 @@ export default function POSProducts() {
                         width: '100%',
                     }}
                 >
-                    {isAllowed('Product', 'read') && (
-                        <POSButton
-                            title={
-                                <Stack
-                                    sx={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        gap: 1,
-                                    }}
-                                >
-                                    <Print />
-                                    {t('POS.ExportProducts')}
-                                </Stack>
-                            }
-                            variant="save"
-                            width={{ xs: '100%', md: 'auto' }}
-                            onClick={() => {
-                                setBoolState((prev) => ({ ...prev, exportModal: true }));
-                                // printProducts();
-                            }}
-                        />
-                    )}
+
                     {isAllowed('Category', 'create') && (
                         <POSButton
                             title={
@@ -386,12 +363,6 @@ export default function POSProducts() {
                 />
             )}
 
-            {boolState?.exportModal && (
-                <ExportProducts
-                    open={boolState?.exportModal}
-                    onClose={() => setBoolState((prev) => ({ ...prev, exportModal: false }))}
-                />
-            )}
         </Stack>
     );
 }

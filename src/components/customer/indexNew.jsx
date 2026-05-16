@@ -359,34 +359,6 @@ const CustomerListNew = () => {
                             {`+ ${t('Customer.AddNewCustomer')}`}
                         </RadixButton>
                     )}
-
-                    <RadixButton
-                        type="button"
-                        variant="primary"
-                        disabled={loading?.export}
-                        onClick={async () => {
-                            setLoading((prev) => ({ ...prev, export: true }));
-                            try {
-                                const response = await apiFetcher2.get('/api/customers/export', {
-                                    responseType: 'blob',
-                                });
-                                const link = document.createElement('a');
-                                const url = (link.href = window.URL.createObjectURL(
-                                    new Blob([response.data], { type: 'text/csv;charset=utf-8;' }),
-                                ));
-                                link.setAttribute('download', 'customers.csv');
-                                link.click();
-                                window.URL.revokeObjectURL(url);
-                            } catch (error) {
-                                console.error('Export API error:', error);
-                            } finally {
-                                setLoading((prev) => ({ ...prev, export: false }));
-                            }
-                        }}
-                        className="w-full min-w-0 md:w-full lg:w-fit !bg-[#44b904] !text-white border-none hover:!bg-[#3da003]"
-                    >
-                        {loading?.export ? '…' : t('Setting.Export')}
-                    </RadixButton>
                 </div>
             </div>
 

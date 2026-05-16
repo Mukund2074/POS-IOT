@@ -40,26 +40,6 @@ import CashDrawerLayout from './scenes/POS/UI/CashDrawer/cash-drawer.layout';
 // POS - Settings
 import PosSettings from './scenes/POS/UI/Pos-settings/Pos-settings.index';
 
-// POS - Report
-import Report from './scenes/POS/UI/Report/report.index';
-import ReportSales from './scenes/POS/UI/Report/List/ReportSales';
-import ReportSection from './scenes/POS/UI/Report/List/ReportSection';
-import WeeklyRevenue from './scenes/POS/UI/Report/UI/Sales/WeeklyRevenue';
-import StockStatus from './scenes/POS/UI/Report/UI/Sales/StockStatus';
-import PaymentMethod from './scenes/POS/UI/Report/UI/Sales/PaymentMethod';
-import ActiveGiftCard from './scenes/POS/UI/Report/UI/Sales/ActiveGiftCard';
-import ActiveClippingCard from './scenes/POS/UI/Report/UI/Sales/ActiveClippingCard';
-import VatMethod from './scenes/POS/UI/Report/UI/Sales/VATmethod';
-import ProductSale from './scenes/POS/UI/Report/UI/Sales/ProductSales';
-
-// POS - Customer
-import UniqueCustomer from './scenes/POS/UI/Report/UI/Customer/UniqueCustomer';
-import TopCustomers from './scenes/POS/UI/Report/UI/Customer/TopCustomer';
-import CustomerByPostal from './scenes/POS/UI/Report/UI/Customer/CustomerByPostal';
-import NewCustomers from './scenes/POS/UI/Report/UI/Customer/NewCustomers';
-import Outstanding from './scenes/POS/UI/Report/UI/Customer/Outstanding';
-import Receivables from './scenes/POS/UI/Report/UI/Customer/Receivables';
-
 // GiftCard
 import GiftCardLayout from './scenes/GIftCard/GiftCard.layout';
 import GiftCardPageLayout from './scenes/GIftCard/UI/Gift-card/GiftCardPage.layout';
@@ -132,73 +112,6 @@ export const router = createBrowserRouter([
                 path: 'pos',
                 element: <ProtectedRoute element={<POSLayout />} />,
                 children: [
-                    {
-                        path: 'report',
-                        element: <ProtectedRoute element={<Report />} />,
-                        children: [
-                            {
-                                path: 'sales',
-                                element: <ProtectedRoute element={<ReportSales />} />,
-                            },
-                            {
-                                path: 'allreport',
-                                element: <ProtectedRoute element={<ReportSection />} />,
-                            },
-                            {
-                                path: 'sales/weekly-revenue',
-                                element: <ProtectedRoute element={<WeeklyRevenue />} />,
-                            },
-                            {
-                                path: 'sales/products',
-                                element: <ProtectedRoute element={<ProductSale />} />,
-                            },
-                            {
-                                path: 'sales/payment-methods',
-                                element: <ProtectedRoute element={<PaymentMethod />} />,
-                            },
-                            {
-                                path: 'sales/vat',
-                                element: <ProtectedRoute element={<VatMethod />} />,
-                            },
-                            {
-                                path: 'sales/gift-cards',
-                                element: <ProtectedRoute element={<ActiveGiftCard />} />,
-                            },
-                            {
-                                path: 'sales/punch-cards',
-                                element: <ProtectedRoute element={<ActiveClippingCard />} />,
-                            },
-                            {
-                                path: 'sales/stock',
-                                element: <ProtectedRoute element={<StockStatus />} />,
-                            },
-                            // customer routes
-                            {
-                                path: 'customers/unique',
-                                element: <ProtectedRoute element={<UniqueCustomer />} />,
-                            },
-                            {
-                                path: 'customers/top-100',
-                                element: <ProtectedRoute element={<TopCustomers />} />,
-                            },
-                            {
-                                path: 'customers/postal-codes',
-                                element: <ProtectedRoute element={<CustomerByPostal />} />,
-                            },
-                            {
-                                path: 'customers/new',
-                                element: <ProtectedRoute element={<NewCustomers />} />,
-                            },
-                            {
-                                path: 'customers/outstanding',
-                                element: <ProtectedRoute element={<Outstanding />} />,
-                            },
-                            {
-                                path: 'customers/receivables',
-                                element: <ProtectedRoute element={<Receivables />} />,
-                            },
-                        ],
-                    },
                     {
                         path: 'products',
                         element: <ProtectedRoute element={<POSProducts />} />,
