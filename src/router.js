@@ -56,6 +56,10 @@ import SoldPunchCards from './scenes/PunchCard/PAGES/punch-card-sold/punch-card-
 import EditSoldPunchCard from './scenes/PunchCard/PAGES/punch-card-sold/Create-Edit/EditSoldPunchCard';
 
 import Unauthorized from './scenes/Unauthorized/Unauthorized';
+import AdminPage from './scenes/Admin/Admin.index';
+import AdminDashboard from './scenes/Admin/Dashboard/AdminDashboard.index';
+import AdminLoginPage from './scenes/Admin/Login/AdminLogin.index';
+
 
 export const router = createBrowserRouter([
     {
@@ -65,6 +69,22 @@ export const router = createBrowserRouter([
             {
                 path: '/',
                 element: <LoginFlow />,
+            },
+            {
+                path: 'admin-login',
+                element: <AdminLoginPage />,
+            },
+            {
+                path: 'admin',
+                element: <ProtectedRoute element={<AdminDashboard />} />,
+            },
+            {
+                path: 'admin/create',
+                element: <ProtectedRoute element={<AdminPage />} />,
+            },
+            {
+                path: 'admin/edit/:id',
+                element: <ProtectedRoute element={<AdminPage />} />,
             },
             {
                 path: 'unauthorized',

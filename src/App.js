@@ -213,7 +213,8 @@ function App() {
                                 {/* DESKTOP SIDEBAR */}
                                 {!isMobile &&
                                     location.pathname !== '/' &&
-                                    !location.pathname.startsWith('/booking/') &&
+                                    !location.pathname.startsWith('/admin') &&
+                                    !location.pathname.startsWith('/admin-login') &&
                                     !isWebView && (
                                         <div className="sidebar-wrapper" style={{ width: isCollapse ? 60 : 170 }}>
                                             <Sidebar
@@ -235,7 +236,7 @@ function App() {
                             </div>
 
                             {/* MOBILE DRAWER (UNCHANGED) */}
-                            {isMobile && !isWebView && (
+                            {isMobile && !isWebView && !location.pathname.startsWith('/admin') && !location.pathname.startsWith('/admin-login') && (
                                 <Drawer
                                     open={isSidebarOpen}
                                     onClose={() => {

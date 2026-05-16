@@ -8,7 +8,9 @@ const apiFetcher = axios.create({
 // Add request interceptor to include Authorization header
 apiFetcher.interceptors.request.use(
     (config) => {
-        const authToken = localStorage.getItem('auth_token');
+        const isAdminRoute = config.url.includes('api/v1/admin');
+        const authToken = localStorage.getItem(isAdminRoute ? 'admin_auth_token' : 'auth_token');
+        
         if (authToken) {
             config.headers['Authorization'] = `Bearer ${authToken}`;
         }
