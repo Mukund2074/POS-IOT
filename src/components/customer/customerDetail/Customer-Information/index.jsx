@@ -16,8 +16,8 @@ import RadixTextarea from '../../../radix/RadixTextarea';
 import RadixSelect from '../../../radix/RadixSelect';
 import RadixPhoneField from '../../../radix/RadixPhoneField';
 import RadixButton from '../../../radix/RadixButton';
-import { toast } from 'sonner';
 import { UserRound, MapPin, NotebookPen } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const dateObject = {
     dates: Array.from({ length: 31 }, (_, i) => i + 1),

@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../index.css';
 import { useNavigate } from 'react-router-dom';
-import * as Sentry from '@sentry/react';
 
 import { useDispatch } from 'react-redux';
 import { user } from '../../context/permissionSlice';
@@ -96,7 +95,6 @@ const LoginFlow = () => {
                 phone_number: phone.replace(/\s/g, ''),
                 password: password,
             };
-            Sentry.logger.info('Payload for login', payload);
             const { data } = await authLogin({ payload });
 
             const locationData = data.map((location) => ({
@@ -119,7 +117,6 @@ const LoginFlow = () => {
             setLocations(locationData);
             setLoginData(data);
         } catch (error) {
-            Sentry.logger.info('Error from handleLogin', error);
             console.log('error When trying to login', error);
             toast.error('Login failed. Please try again.');
         }

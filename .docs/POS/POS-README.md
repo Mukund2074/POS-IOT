@@ -121,7 +121,6 @@ npm start
 
 ```bash
 REACT_APP_API_URL=http://localhost:3005
-REACT_APP_SENTRY_DSN=your_sentry_dsn
 REACT_APP_NODE_ENV=development
 ```
 

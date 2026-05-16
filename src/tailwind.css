@@ -15,18 +15,3 @@
 .btn-fs {
     font-size: var(--fs);
 }
-
-
-/* 
-  CSS Layers order (from lowest to highest priority):
-  1. tailwind-base (lowest)
-  2. tailwind-components
-  3. MUI styles (default layer)
-  4. tailwind-utilities (highest - can override MUI if needed, but we avoid this)
-  
-  This ensures Tailwind doesn't interfere with MUI components.
-  Only use Tailwind classes on Radix components or custom HTML elements.
-  
-  IMPORTANT: This file is ONLY imported in MarketingLayout component.
-  Tailwind CSS will NOT be loaded or affect any routes outside /marketing.
-*/

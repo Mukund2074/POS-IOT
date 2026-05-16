@@ -22,7 +22,7 @@ import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { HttpStatusCode } from 'axios';
 import { useData } from '../../context/DataContext';
-import { toast } from 'sonner';
+import { toast } from 'react-toastify';
 import RadixButton from '../../components/radix/RadixButton';
 
 /* ─────────────────────────────────────────────────────────────

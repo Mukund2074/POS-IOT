@@ -1902,7 +1902,7 @@
         "SelectSalesType": "Select sales type",
         "TransferToBankError": "Transfer to bank cannot exceed Total cash",
         "TransferToBankRequired": "Transfer to bank is required",
-        "VoteForSecondTerm": "Afstem for anden periode",
+        "VoteForSecondTerm": "Vote for next term",
         "Close": "Close",
         "ReceiptSentSuccessfully": "Receipt sent successfully",
         "SendReceiptToCustomer": "Send receipt to customer",

@@ -35,9 +35,6 @@ export default function ListAndFilter({
         { value: 'CASH', label: t('POS.CashPayment') },
         { value: 'CARD', label: t('POS.CardPayment') },
         { value: 'GIFT_CARD', label: t('POS.GiftCardPayment') },
-        { value: 'CHEQUE', label: t('POS.ChequePayment') },
-        { value: 'ECOMMERCE', label: t('POS.EcommercePayment') },
-        // { value: 'OTHER', label: t('POS.OtherPayment') },
     ];
 
     const typeOptions = [

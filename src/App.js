@@ -19,7 +19,6 @@ import SidebarIcon from '@/assets/Marketing/SidebarIcon.svg';
 import { LayoutContext } from './context/LayoutContext';
 import { ToastContainer } from 'react-toastify';
 import { useSelector } from 'react-redux';
-import { Toaster } from 'sonner';
 
 function App() {
     const [theme, colorMode] = useMode();
@@ -192,7 +191,6 @@ function App() {
         <ColorModeContext.Provider value={colorMode}>
             <RadixToastProvider>
                 <ToastContainer />
-                <Toaster position="top-right" richColors closeButton />
                 <ThemeProvider theme={theme}>
                     <CustomerProvider>
                         <CssBaseline />
