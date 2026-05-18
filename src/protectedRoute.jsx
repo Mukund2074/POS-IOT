@@ -5,7 +5,9 @@ import { getRequiredPermissionForPath } from './utils/permissionMap.ts';
 
 const ProtectedRoute = ({ element }) => {
     const location = useLocation();
-    const isAdminPath = location.pathname.startsWith('/admin');
+    const isAdminPath =
+        location.pathname.startsWith('/admin') &&
+        !location.pathname.startsWith('/admin-login');
     const token = localStorage.getItem(isAdminPath ? 'admin_auth_token' : 'auth_token');
     
     const user = useSelector((state) => state.user?.data);

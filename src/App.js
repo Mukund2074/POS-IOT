@@ -56,6 +56,7 @@ function App() {
             const isPublicRoute =
                 location.pathname.startsWith('/booking/') ||
                 location.pathname.startsWith('/admin-login');
+            const isAdminRoute = location.pathname.startsWith('/admin');
 
             if (auth_token) {
                 localStorage.setItem('auth_token', auth_token);
@@ -89,13 +90,14 @@ function App() {
                     }
                 }
                 // navigate("/calendar")
-            } else if (!auth_token && !auth2 && !isPublicRoute) {
+            } else if (!auth_token && !auth2 && !isPublicRoute && !isAdminRoute) {
                 navigate('/');
             }
         } catch (error) {
             if (
                 !location.pathname.startsWith('/booking/') &&
-                !location.pathname.startsWith('/admin-login')
+                !location.pathname.startsWith('/admin-login') &&
+                !location.pathname.startsWith('/admin')
             ) {
                 navigate('/');
             }

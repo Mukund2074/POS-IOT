@@ -74,18 +74,16 @@ export const router = createBrowserRouter([
                 element: <AdminLoginPage />,
             },
             {
+                path: 'admin/create',
+                element: <ProtectedRoute element={<AdminPage />} />,
+            },
+            {
+                path: 'admin/edit/:id',
+                element: <ProtectedRoute element={<AdminPage />} />,
+            },
+            {
                 path: 'admin',
                 element: <ProtectedRoute element={<AdminDashboard />} />,
-                children: [
-                    {
-                        path: 'create',
-                        element: <ProtectedRoute element={<AdminPage />} />,
-                    },
-                    {
-                        path: 'edit/:id',
-                        element: <ProtectedRoute element={<AdminPage />} />,
-                    },
-                ],
             },
             {
                 path: 'unauthorized',

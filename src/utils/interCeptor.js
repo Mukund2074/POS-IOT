@@ -46,9 +46,15 @@ apiFetcher.interceptors.response.use(
         }
     },
     (error) => {
-        if (error.response.status === HttpStatusCode.Forbidden) {
-            window.location.href = '/';
-            localStorage.clear();
+        if (error.response?.status === HttpStatusCode.Forbidden) {
+            const isAdminRequest = error.config?.url?.includes('api/v1/admin');
+            if (isAdminRequest) {
+                localStorage.removeItem('admin_auth_token');
+                window.location.href = '/admin-login';
+            } else {
+                localStorage.clear();
+                window.location.href = '/';
+            }
             return Promise.reject('Forbidden');
         }
         return Promise.reject(error);
