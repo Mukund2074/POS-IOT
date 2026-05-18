@@ -4,8 +4,7 @@ import { formatCurrency } from '@/scenes/POS/Core/pos.utils';
 import { Stack } from '@mui/material';
 import { t } from 'i18next';
 import moment from 'moment';
-import { FaArrowRight, FaRegFilePdf } from 'react-icons/fa';
-import { PiTicketBold } from 'react-icons/pi';
+import { FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { GiftCardBodyProps } from '../Types/GiftCard.types';
 import Permission from '@/utils/POS/Permission';
@@ -13,19 +12,6 @@ import Permission from '@/utils/POS/Permission';
 const GiftCardBody = ({ giftCardData, isFetching }: GiftCardBodyProps) => {
     const navigate = useNavigate();
     const { isAllowed } = Permission();
-    const haveReadInvoicePermission = isAllowed('Invoice', 'read');
-
-    const handlePrintGiftCard = ({ id }: { id: string }) => {
-        const url = `${process.env.REACT_APP_URL2}/api/gift-cards/${id}/pdf`;
-        window.open(url, '_blank');
-    };
-
-    const handlePrintInvoice = ({ id }: { id: string }) => {
-        if (haveReadInvoicePermission) {
-            const url = `${process.env.REACT_APP_URL2}/api/giftcard-invoice/${id}/pdf`;
-            window.open(url, '_blank');
-        }
-    };
 
     const columns = [
         {
@@ -81,13 +67,6 @@ const GiftCardBody = ({ giftCardData, isFetching }: GiftCardBodyProps) => {
             name: '',
             selector: (row: RowType) => (
                 <Stack sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                    <PiTicketBold
-                        size={17}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handlePrintGiftCard({ id: row.id as string });
-                        }}
-                    />
                     {isAllowed('GiftCard', 'update') && (
                         <FaArrowRight
                             color="#44b904"

@@ -8,7 +8,7 @@ import { PosSettingsApi } from '@/scenes/POS/UI/Pos-settings/Core/pos-settings.a
 import { PosSetting } from '@/scenes/POS/UI/Pos-settings/Types/pos-settings.types';
 import { GetApiGiftCardsOnlineType200ItemsItem } from '@/shared/api/models';
 import { api } from '@/utils/Api/POS';
-import { Edit, Print } from '@mui/icons-material';
+import { Edit } from '@mui/icons-material';
 import { Box, Stack, Typography } from '@mui/material';
 import { t } from 'i18next';
 import moment from 'moment';
@@ -29,7 +29,6 @@ const OnlineGiftCards = () => {
         GetApiGiftCardsOnlineType200ItemsItem | null | string
     >(null);
     const settingFromStore = useSelector((state: any) => state?.settings?.data);
-    const [exportLoading, setExportLoading] = useState(false);
     const [sellOnlineGiftCard, setSellOnlineGiftCard] = useState(
         settingFromStore?.posSetting?.value?.sell_online_gift_card,
     );
@@ -181,27 +180,6 @@ const OnlineGiftCards = () => {
         }
     };
 
-    const handleExport = async () => {
-        setExportLoading(true);
-        try {
-            const response = await api.getApiGiftCardsOnlineType('csv');
-            if (response) {
-                const csvContent = typeof response === 'string' ? response : JSON.stringify(response);
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `online_gift_card.csv`;
-                link.click();
-                window.URL.revokeObjectURL(url);
-            }
-        } catch (error) {
-            console.error('Error : ', error);
-        } finally {
-            setExportLoading(false);
-        }
-    };
-
     useEffect(() => {
         fetchData();
     }, []);
@@ -238,26 +216,6 @@ const OnlineGiftCards = () => {
                         />
                     </Stack>
 
-                    <POSButton
-                        title={
-                            <Stack
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                }}
-                            >
-                                <Print />
-                                {t('GiftCard.ExportOnlineGiftCards')}
-                            </Stack>
-                        }
-                        variant="save"
-                        width={{ xs: '100%', md: 'auto' }}
-                        sx={{ ml: 'auto', mb: 2 }}
-                        onClick={() => handleExport()}
-                        loading={exportLoading}
-                    />
                     <POSButton
                         variant="save"
                         title={`+ ${t('GiftCard.CreateOnlineGiftCard')}`}

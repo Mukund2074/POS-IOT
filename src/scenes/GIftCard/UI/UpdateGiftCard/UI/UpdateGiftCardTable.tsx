@@ -1,30 +1,14 @@
-import POSHeading from '@/components/POS/Common/POSHeading';
 import POSTable, { RowType } from '@/components/POS/Common/POSTable';
 import moment from 'moment';
 import { UpdateGiftCardTableProps } from '../Types/UpdateGiftCard.types';
 import { formatCurrency } from '@/scenes/POS/Core/pos.utils';
-import Permission from '@/utils/POS/Permission';
 
 const UpdateGiftCardTable = ({ data }: UpdateGiftCardTableProps) => {
-    const { isAllowed } = Permission();
-    const haveReadInvoicePermission = isAllowed('Invoice', 'read');
-
     const columns = [
         {
             id: 'invoiceNumber',
             name: 'Sales',
-            selector: (row: RowType) => (
-                <POSHeading
-                    fontSize={14}
-                    text={'Sales ' + row.invoiceNumber}
-                    sx={haveReadInvoicePermission && { color: '#268', textDecoration: 'underline' }}
-                    onClick={() => {
-                        if (row?.salesId && haveReadInvoicePermission) {
-                            window.open(`${process.env.REACT_APP_URL2}/api/invoice/${row?.salesId}/pdf`, '_blank');
-                        }
-                    }}
-                />
-            ),
+            selector: (row: RowType) => row.invoiceNumber,
             sortable: false,
         },
         {

@@ -3,7 +3,6 @@ import POSTable, { RowType } from '@/components/POS/Common/POSTable';
 import moment from 'moment';
 import SalesDetailsDrawer from './SalesDetailsDrawer';
 import { formatCurrency } from '@/scenes/POS/Core/pos.utils';
-import { FaRegFilePdf } from 'react-icons/fa';
 import { Stack, Typography } from '@mui/material';
 import { MailOutlineRounded } from '@mui/icons-material';
 import SendEmailReceipt from './Modals/SendEmailReceipt';
@@ -103,7 +102,7 @@ export default function SalesTable({
                         }}
                         sx={{ cursor: 'pointer', fontSize: 18 }}
                     />
-                  
+
                     <img
                         src={DeleteIcon}
                         alt="Delete"

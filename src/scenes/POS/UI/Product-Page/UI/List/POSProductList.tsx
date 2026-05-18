@@ -8,8 +8,7 @@ import {
     GetApiProductsListing200ProductsItemProductsItem,
 } from '@/shared/api/models';
 import POSHeading from '@/components/POS/Common/POSHeading';
-import { ArrowForward, Print } from '@mui/icons-material';
-import { toast } from 'react-toastify';
+import { ArrowForward } from '@mui/icons-material';
 import Permission from '@/utils/POS/Permission';
 const DeleteIcon: string = require('@/assets/Delete.svg').default;
 const EditIcon: string = require('@/assets/editProduct.svg').default;
@@ -50,31 +49,6 @@ export default function POSProductList({
         );
     }
 
-    const handlePrintCategory = async (category: GetApiProductsListing200ProductsItem) => {
-        try {
-            toast.info(t('POS.Processing'), {
-                toastId: 'processing',
-            });
-
-            const token = localStorage.getItem('auth_token');
-            const encodedToken = btoa(token || '');
-            window.open(
-                `${process.env.REACT_APP_URL2}/api/category-list-print/${category?.id}/pdf?et=${encodedToken}`,
-                '_blank',
-            );
-        } catch (error) {
-            toast.update('processing', {
-                render: t('POS.FailedToPrintCategory'),
-                type: 'error',
-                isLoading: false,
-                autoClose: 3000,
-            });
-            console.error(error);
-        } finally {
-            toast.dismiss('processing');
-        }
-    };
-
     return (
         <Stack
             sx={{
@@ -112,14 +86,6 @@ export default function POSProductList({
                                     )}
                                 {category?.id === '0' ? t('POS.UnCatProds') : category?.name}
                                 <Stack sx={{ display: 'flex', flexDirection: 'row', gap: 2, ml: 'auto' }}>
-                                    {category?.id !== '0' && (
-                                        <Print
-                                            sx={{ fontSize: 20, cursor: 'pointer' }}
-                                            onClick={() => {
-                                                handlePrintCategory(category);
-                                            }}
-                                        />
-                                    )}
                                     {category?.id !== '0' && isAllowedToEdit && (
                                         <img
                                             style={{ cursor: 'pointer' }}

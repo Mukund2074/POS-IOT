@@ -3,7 +3,7 @@ import CashDrawerHeader from './components/CashDrawerHeader';
 import CashReconcilationBody from './components/CashReconcilation/CashReconcilationBody';
 import CashDrawerBankTransferForm from './components/BankTransferForm/CashDrawerBankTransferForm';
 import CashDrawerFooter from './components/BankTransferForm/CashDrawerFooter';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import ConfirmCashDrawerModal from './components/Modals/ConfirmCashDrawerModal';
 import { GetApiCashDrawerEmployeeSummary200Data, PostApiCashDrawerCloseBody } from '@/shared/api/models';
 import { useFormik } from 'formik';
@@ -32,7 +32,6 @@ const CashDrawerLayout = () => {
     const { mutate: createCashDrawer } = useCreateCashDrawer();
     const [openSaleDetails, setOpenSaleDetails] = useState(false);
     const [modalName, setModalName] = useState('');
-    const printRef = useRef<HTMLDivElement>(null);
     const storeName = setting?.profile?.name || '';
 
     const params = {
@@ -172,11 +171,6 @@ const CashDrawerLayout = () => {
                     toast.success(t('POS.CashDrawerCloseDrawerSuccess'));
                     formik.resetForm();
                     getCashDrawerData();
-                    // handlePrint();
-                    window.open(
-                        `${process.env.REACT_APP_URL2}/api/cash-drawer/${modifiedData?.cashDrawerId}/pdf`,
-                        '_blank',
-                    );
                     setSelectedTimeSlot(timeSlots[timeSlots.length - 1].split(' - ')[0]);
                 }
             } catch (error) {
@@ -270,7 +264,6 @@ const CashDrawerLayout = () => {
     }, [formik.values.drawerEndDate, selectedTimeSlot]);
 
     useEffect(() => {
-        // Find values by key instead of array index
         const visaAmount = formik.values.CashDifferenceForm.find((item) => item.key === 11)?.val || 0;
         const mastercardAmount = formik.values.CashDifferenceForm.find((item) => item.key === 12)?.val || 0;
         const forbrugsforeningenAmount = formik.values.CashDifferenceForm.find((item) => item.key === 13)?.val || 0;
@@ -326,19 +319,16 @@ const CashDrawerLayout = () => {
 
     return (
         <Box>
-            {/* <button onClick={handlePrint}>Print</button> */}
             {!cashDrawerData?.cashDrawerId && !isLoading ? (
                 <StartDrawer onSubmit={(amount) => handleStartDrawer(amount)} />
             ) : (
                 <React.Fragment>
-                    <Stack className="print-cashdrawer" ref={printRef}>
+                    <Stack className="print-cashdrawer">
                         <CashDrawerHeader
                             formik={formik}
                             storeName={storeName}
                             employee={employee}
                             setVoteForSecondTerm={() => setVoteForSecondTerm((prev) => !prev)}
-                            // selectedCashDrawerEmployee={selectedCashDrawerEmployee}
-                            // setSelectedCashDrawerEmployee={setSelectedCashDrawerEmployee}
                         />
                         <CashReconcilationBody formik={formik} handlePaymentClick={handlePaymentClick} />
                         <CashDrawerBankTransferForm formik={formik} />

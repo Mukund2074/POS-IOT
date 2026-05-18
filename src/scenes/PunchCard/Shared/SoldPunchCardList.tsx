@@ -1,7 +1,7 @@
 import { POSTable, RowType } from '@/components/POS/Common';
 import POSMenu from '@/components/POS/Common/POSMenu';
 import { GetApiBundleOffersSoldIdType200Item } from '@/shared/api/models';
-import { Edit, Print, Receipt } from '@mui/icons-material';
+import { Edit, Receipt } from '@mui/icons-material';
 import { t } from 'i18next';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -75,13 +75,6 @@ export default function SoldPunchCardList({ data, isLoading }: SoldPunchCardList
                                 navigate(`/punch-card/usage/${row.id}`);
                             },
                         },
-                        {
-                            label: t('PunchCard.DownloadPunchCard'),
-                            icon: <Print fontSize="small" />,
-                            onClick: () => {
-                                window.open(`${process.env.REACT_APP_URL2}/api/punch-card/${row.id}/pdf`, '_blank');
-                            },
-                        },
                     ]}
                 />
             ),
@@ -91,9 +84,6 @@ export default function SoldPunchCardList({ data, isLoading }: SoldPunchCardList
 
     return (
         <POSTable
-            onRowClick={(row) => {
-                // navigate(`/punch-card/usage/${row.id}`);
-            }}
             columns={columns}
             data={data || []}
             loading={isLoading}

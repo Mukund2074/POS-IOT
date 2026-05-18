@@ -29,17 +29,7 @@ export default function GiftCardsCustomer() {
         data.length > 0 &&
         data?.map((item) => ({
             id: item.id,
-            giftCardCode: (
-                <Stack
-                    sx={{ cursor: 'pointer', textDecoration: 'underline', color: '#1976d2', fontWeight: 'bold' }}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`${process.env.REACT_APP_URL2}/api/gift-cards/${item?.id}/pdf`, '_blank');
-                    }}
-                >
-                    {item?.giftCardCode}
-                </Stack>
-            ),
+            giftCardCode: item?.giftCardCode,
             residueValue: formatCurrency(item?.residueValue),
             usageStatus: item?.status,
             originalValue: formatCurrency(item?.originalValue),

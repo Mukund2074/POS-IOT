@@ -1,5 +1,4 @@
 import { IconButton, Modal, Paper, Stack } from '@mui/material';
-import React from 'react';
 import POSHeading from '@/components/POS/Common/POSHeading';
 import POSTable, { RowType } from '@/components/POS/Common/POSTable';
 import { CashDrawerUtils } from '../../Core/cash-drawer.utils';
@@ -7,7 +6,6 @@ import { Close } from '@mui/icons-material';
 import { formatCurrency } from '@/scenes/POS/Core/pos.utils';
 import moment from 'moment';
 import { t } from 'i18next';
-import Permission from '@/utils/POS/Permission';
 
 export default function ListByPaymentType({
     openSaleDetails,
@@ -20,31 +18,11 @@ export default function ListByPaymentType({
     modalName: string;
     cashDrawerUtils: CashDrawerUtils;
 }) {
-    const { isAllowed } = Permission();
-    const haveReadInvoicePermission = isAllowed('Invoice', 'read');
-
     const columns = [
         {
             id: 'id',
             name: modalName === 'OUTLAYS' ? 'OUTLAYS ID' : 'Sales ID',
-            selector: (row: RowType) => (
-                <POSHeading
-                    text={row.invoiceId}
-                    onClick={() => {
-                        if (haveReadInvoicePermission) {
-                            window.open(`${process.env.REACT_APP_URL2}/api/invoice/${row.id}/pdf`, '_blank');
-                        }
-                    }}
-                    sx={
-                        haveReadInvoicePermission && {
-                            cursor: 'pointer',
-                            '&:hover': { textDecoration: 'underline' },
-                            color: '#268',
-                        }
-                    }
-                    fontSize={14}
-                />
-            ),
+            selector: (row: RowType) => <POSHeading text={row.invoiceId} fontSize={14} />,
             sortable: true,
         },
         {

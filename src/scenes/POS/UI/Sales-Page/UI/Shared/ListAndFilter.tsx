@@ -15,7 +15,6 @@ import type {
 } from '@/shared/api/models';
 import Permission, { PermissionDenied } from '@/utils/POS/Permission';
 import POSInput from '@/components/POS/Common/POSInput';
-import SalesPrintFilters from '../List/Modals/SalesPrintFilters';
 import { POSDateRangePicker } from '@/components/POS/Common/POSDateRangePicker';
 import moment, { Moment } from 'moment';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -42,8 +41,6 @@ export default function ListAndFilter({
         { value: 'RETURN', label: t('POS.CreditSale') },
         { value: 'NOSHOW', label: t('POS.NoShow') },
     ];
-
-    const [showPrintModal, setShowPrintModal] = useState<boolean>(false);
 
     const [params, setParams] = useState({
         page: 1,
@@ -154,7 +151,6 @@ export default function ListAndFilter({
                     )}
                 </Stack>
             </Stack>
-          
 
             {isAllowed('Sales', 'read') ? (
                 <InfiniteScroll
@@ -181,15 +177,6 @@ export default function ListAndFilter({
                 </InfiniteScroll>
             ) : (
                 <PermissionDenied />
-            )}
-
-            {showPrintModal && (
-                <SalesPrintFilters
-                    open={showPrintModal}
-                    onClose={() => setShowPrintModal(false)}
-                    typeOptions={typeOptions}
-                    filterOptions={filterOptions}
-                />
             )}
         </React.Fragment>
     );

@@ -30,17 +30,7 @@ export default function PunchCardsCustomer() {
         data?.map((item) => ({
             id: item.id,
             bundleOfferName: item?.bundleOfferName,
-            bundleOfferCode: (
-                <Stack
-                    sx={{ cursor: 'pointer', textDecoration: 'underline', color: '#1976d2', fontWeight: 'bold' }}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(`${process.env.REACT_APP_URL2}/api/punch-card/${item.id}/pdf`, '_blank');
-                    }}
-                >
-                    {item?.bundleOfferCode}
-                </Stack>
-            ),
+            bundleOfferCode: item?.bundleOfferCode,
             residuePunches: item?.residuePunches,
             usageStatus: item?.status,
             services: !item?.applicableServices?.services
@@ -53,14 +43,7 @@ export default function PunchCardsCustomer() {
             receiptDate: moment(item?.receiptDate).format('DD/MM-YYYY HH:mm'),
         }));
 
-    const visible = [
-        'bundleOfferCode',
-        'bundleOfferName',
-        'residuePunches',
-        'services',
-        'usageStatus',
-        'receiptDate',
-    ];
+    const visible = ['bundleOfferCode', 'bundleOfferName', 'residuePunches', 'services', 'usageStatus', 'receiptDate'];
 
     const radixColumns = useMemo(
         () =>

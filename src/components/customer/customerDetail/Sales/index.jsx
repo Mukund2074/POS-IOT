@@ -33,27 +33,7 @@ export default function SalesListCustomer() {
         data.length > 0 &&
         data?.map((item) => ({
             id: item.id,
-            invoiceNumber: (
-                <Stack
-                    sx={
-                        haveReadInvoicePermission && {
-                            cursor: 'pointer',
-                            textDecoration: 'underline',
-                            color: '#1976d2',
-                            fontWeight: 'bold',
-                        }
-                    }
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (haveReadInvoicePermission) {
-                            window.open(`${process.env.REACT_APP_URL2}/api/invoice/${item.id}/pdf`, '_blank');
-                        }
-                    }}
-                >
-                    {' '}
-                    {item?.invoiceNumber}
-                </Stack>
-            ),
+            invoiceNumber: item?.invoiceNumber,
             subtotal: formatCurrency(item?.amount),
             tenderAmount: formatCurrency(item?.tenderAmount),
             netTotal: formatCurrency(item?.netTotal),
